@@ -1,0 +1,40 @@
+# ==========================================
+# Exclusiones obligatorias (Reglamento TPG)
+# ==========================================
+
+# Archivos generados y binarios de Maven (target/)
+target/
+
+# Datos locales de la base de datos H2
+*.db
+*.mv.db
+*.h2.db
+
+# ==========================================
+# Exclusiones de Entornos de Desarrollo (IDE)
+# ==========================================
+
+# IntelliJ IDEA (JetBrains)
+.idea/
+*.iml
+*.iws
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Eclipse / JDeveloper (por si algún integrante lo usa)
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
