@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 
 public abstract class Nave {
+    private final int COMBUSTIBLE_MAX = 100;
+    private final int ENERGIA_MAX = 100;
+    private final int DESGASTE_MAX = 100;
     private static int contadorId = 0;
     private int id;
     private String tipo;
@@ -10,19 +13,39 @@ public abstract class Nave {
     private MotorWarp motor;
     private ArrayList<Tripulante> tripulacion;
 
-    public Nave(){}
+    public Nave(String tipo, int combustible, int energia, int desgaste){
+        this.id= Nave.contadorId++;
+        this.tipo = tipo;
+        this.combustible= combustible;
+        this.desgaste= desgaste;
+        this.energia= energia;
+        this.motor = new MotorWarp();
+        this.tripulacion = new ArrayList<>();
+    }
 
     //-- Sección de identidad
-    //public int getId(){}
-    //public String getTipo(){}
+    public int getId(){
+        return id;
+    }
+    public String getTipo(){
+        return tipo;
+    }
 
-    //-- Sección de componentes
-    //public MotorWarp getMotor(){}
+    //-- Sección de componentes -> todavía no sé qué métodos podría tener que implementar
+    public MotorWarp getMotor(){
+        return motor;
+    }
 
     //-- Sección de recursos
-    //public int getCombustible(){}
-    //public int getEnergia(){}
-    //public int getDesgaste(){}
+    public int getCombustible(){
+        return combustible;
+    }
+    public int getEnergia(){
+        return energia;
+    }
+    public int getDesgaste(){
+        return desgaste;
+    }
     //public void cargarEnergia(int cantidad){}
     //public void cargarCombustible(int cantidad){}
     //public void consumirEnergia(int cantidad){}
@@ -33,10 +56,11 @@ public abstract class Nave {
     //public boolean enEstadoOperativo(){}
 
     //- Sección de tripulación
-    //public ArrayList<Tripulante> getTripulacion(){}
+    public ArrayList<Tripulante> getTripulacion(){
+        return tripulacion;
+    }
     //public void asignarTripulante(Tripulante t){}
     //public void eliminarTripulante(Tripulante t){}
     //public boolean verificaTripulacionMinima(){}
 
-    //-- Sección de componentes -> todavía no sé qué métodos podría tener que implementar
     }
