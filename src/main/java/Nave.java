@@ -12,6 +12,8 @@ public abstract class Nave {
     private int energia;
     private int desgaste;
     private MotorWarp motor;
+    //private Bitacora bitacora;
+    //private AsistenteDeComando asistente;
     private ArrayList<Tripulante> tripulacion;
 
     public Nave(String tipo, int combustible, int energia, int desgaste){
@@ -59,7 +61,7 @@ public abstract class Nave {
         //errores: cantidad<0 o energia-cantidad<0
         this.energia -= cantidad;
     }
-    public void consumirComustible(int cantidad){
+    public void consumirCombustible(int cantidad){
         //errores: cantidad<0 o combustible-cantidad<0
         this.combustible -= cantidad;
     }
