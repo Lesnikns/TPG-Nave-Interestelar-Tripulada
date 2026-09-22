@@ -4,6 +4,7 @@ public abstract class Nave {
     private final int COMBUSTIBLE_MAX = 100;
     private final int ENERGIA_MAX = 100;
     private final int DESGASTE_MAX = 100;
+    private final int DESGASTE_UMBRAL = 80;
     private static int contadorId = 0;
     private int id;
     private String tipo;
@@ -46,14 +47,35 @@ public abstract class Nave {
     public int getDesgaste(){
         return desgaste;
     }
-    //public void cargarEnergia(int cantidad){}
-    //public void cargarCombustible(int cantidad){}
-    //public void consumirEnergia(int cantidad){}
-    //public void consumirComustible(int cantidad){}
-    //public void aumentarDesgaste(int cantidad){}
-    //public boolean requiereMantenimieto(){}
-    //public void realizarMantenimiento(){}
-    //public boolean enEstadoOperativo(){}
+    public void cargarEnergia(int cantidad){
+        //errores: cantidad<0 o energia+cantidad>ENERGIA_MAX
+        this.energia += cantidad;
+    }
+    public void cargarCombustible(int cantidad){
+        //errores: cantidad<0 o combustible+cantidad>COMBUSTIBLE_MAX
+        this.combustible += cantidad;
+    }
+    public void consumirEnergia(int cantidad){
+        //errores: cantidad<0 o energia-cantidad<0
+        this.energia -= cantidad;
+    }
+    public void consumirComustible(int cantidad){
+        //errores: cantidad<0 o combustible-cantidad<0
+        this.combustible -= cantidad;
+    }
+    public void aumentarDesgaste(int cantidad){
+        //errores: cantidad<0 o desgaste+cantidad>DESGASTE_MAX
+        this.desgaste += cantidad;
+    }
+    public boolean requiereMantenimieto(){
+        return desgaste>=DESGASTE_UMBRAL;
+    }
+    public void realizarMantenimiento(){
+        this.desgaste=0;
+    }
+    public boolean enEstadoOperativo(){
+        return !requiereMantenimieto();
+    }
 
     //- Sección de tripulación
     public ArrayList<Tripulante> getTripulacion(){
