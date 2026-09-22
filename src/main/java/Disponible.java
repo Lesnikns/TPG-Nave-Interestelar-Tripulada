@@ -2,7 +2,7 @@ public class Disponible implements EstadoMotor {
 
 	@Override
 	public void dejarDisponible(MotorWarp motor) {
-		//RECORDAR MANDAR TRANSICION A BITACORA para ambas invalidas y validas (sea coleccion recursos, misiones, etc.)
+		//recordar mandar transiciones a bitacora para ambas invalidas y validas (sea coleccion recursos, misiones, etc.)
 		Entrada e = new Entrada(null, null);
 		//la bitacora se supone seria un campo de la nave 
 	}

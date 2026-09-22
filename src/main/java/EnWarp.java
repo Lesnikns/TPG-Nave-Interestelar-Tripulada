@@ -2,7 +2,7 @@ public class EnWarp implements EstadoMotor {
 
 	@Override
 	public void dejarDisponible(MotorWarp motor) {
-		//bitacora invalido
+		//registrar en bitacora invalida
 	}
 	@Override
 	public void prepararSalto(MotorWarp motor) {
