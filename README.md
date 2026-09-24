@@ -11,5 +11,6 @@ Decidimos dividir el trabajo en 4 partes para que cada uno se encargue de una ta
 - Ramiro Peñalva: Tripulacion
 - Amelie Iasillo: Asistente de comandos y Misiones
 - Juan Mc Kesey: Motor Warp y Bitacora
+  
 En conjunto realizamos la aplicación del sistema principal/main. 
 
