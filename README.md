@@ -9,7 +9,7 @@ Decidimos dividir el trabajo en 4 partes para que cada uno se encargue de una ta
 ### Division de tareas 
 - Facundo Elizalde: Nave
 - Ramiro Peñalva: Tripulacion
-- Amelie Iasillo: Motor Warp y Bitacora
-- Juan Mc Kesey: Asistente de comandos y Misiones
+- Amelie Iasillo: Asistente de comandos y Misiones
+- Juan Mc Kesey: Motor Warp y Bitacora
 En conjunto realizamos la aplicación del sistema principal/main. 
 
