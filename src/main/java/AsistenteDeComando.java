@@ -27,7 +27,7 @@ public class AsistenteDeComando {
 
     public void escribeBitacora(String mensaje, String tipo){
         Entrada e = new Entrada(mensaje, tipo);
-        bitacora.ingresaEntrada(e);
+        bitacora.cargaEntrada(e);
     }
 
 }

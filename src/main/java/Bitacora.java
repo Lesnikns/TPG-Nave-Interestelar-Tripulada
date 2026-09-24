@@ -20,8 +20,7 @@ public class Bitacora {
 		return log;
 	}
 
-	public Bitacora(ArrayList<Entrada> entradas) {
-		super();
+	public Bitacora() {
 		this.entradas = new ArrayList<>();
 	}
 }

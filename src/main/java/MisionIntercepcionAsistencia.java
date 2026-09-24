@@ -8,7 +8,7 @@ public class MisionIntercepcionAsistencia extends Mision{
 
     @Override
     public void aplicarConsecuencias(AsistenteDeComando asistente) {
-        asistente.getNave().recargarEnergia(this.energia);
+        asistente.getNave().cargarEnergia(this.energia);
         asistente.escribeBitacora("Bonificación: +5 Energía por éxito en M-01.", "EVENTO");
     }
 
