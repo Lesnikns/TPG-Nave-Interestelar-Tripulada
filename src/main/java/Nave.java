@@ -12,7 +12,13 @@ public abstract class Nave {
     private int energia;
     private int desgaste;
     private MotorWarp motor;
+    protected Bitacora bitacora;
+    private AsistenteDeComando asistente;
     private ArrayList<Tripulante> tripulacion;
+
+    public AsistenteDeComando getAsistente() {
+        return asistente;
+    }
 
     public Nave(String tipo, int combustible, int energia, int desgaste){
         this.id= Nave.contadorId++;
@@ -20,9 +26,8 @@ public abstract class Nave {
         this.combustible= combustible;
         this.desgaste= desgaste;
         this.energia= energia;
-        this.motor = new MotorWarp();
+        this.motor = new MotorWarp(this);
         this.tripulacion = new ArrayList<>();
-        this.asistente = new AsistenteDeComando(this);
     }
 
     //-- Sección de identidad
