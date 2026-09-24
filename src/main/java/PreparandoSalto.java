@@ -1,23 +1,25 @@
 public class PreparandoSalto implements EstadoMotor {
+	private Nave nave;
+	private AsistenteDeComando asistente;
 
 	@Override
-	public void dejarDisponible(MotorWarp motor) {
-		//bitacora
+	public void cerrar(MotorWarp motor) {
+		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
 	@Override
-	public void prepararSalto(MotorWarp motor) {
-		//bitacora
+	public void preparar(MotorWarp motor) {
+		motor.setEstado(new EnWarp(this.nave));
+		motor.setNombreEstado("EnWarp");
+		asistente.escribeBitacora("transicion a estado: Preparacion de salto","Transicion");
 	}
 	@Override
-	public void warpear(MotorWarp motor) {
-		motor.setEstado(new EnWarp());
-	}
-	@Override
-	public void enfriar(MotorWarp motor) {
-		//bitacora
+	public void saltar(MotorWarp motor) {
+		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
 	
-	public PreparandoSalto() {
+	public PreparandoSalto(Nave nave) {
 		super();
+		this.nave = nave;
+		this.asistente = nave.getAsistente();
 	}
 }

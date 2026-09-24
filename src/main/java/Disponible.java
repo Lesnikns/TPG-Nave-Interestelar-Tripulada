@@ -1,25 +1,25 @@
 public class Disponible implements EstadoMotor {
+	private Nave nave;
+	private AsistenteDeComando asistente;
 
 	@Override
-	public void dejarDisponible(MotorWarp motor) {
-		//recordar mandar transiciones a bitacora para ambas invalidas y validas (sea coleccion recursos, misiones, etc.)
-		Entrada e = new Entrada(null, null);
-		//la bitacora se supone seria un campo de la nave 
+	public void cerrar(MotorWarp motor) {
+		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
 	@Override
-	public void prepararSalto(MotorWarp motor) {
-		motor.setEstado(new PreparandoSalto());
+	public void preparar(MotorWarp motor) {
+		motor.setEstado(new PreparandoSalto(this.nave));
+		motor.setNombreEstado("EnWarp");
+		asistente.escribeBitacora("transicion a estado: Preparacion de salto","Transicion");
 	}
 	@Override
-	public void warpear(MotorWarp motor) {
-		//devolver entrada erronea
-	}
-	@Override
-	public void enfriar(MotorWarp motor) {
-		//idem
+	public void saltar(MotorWarp motor) {
+		asistente.escribeBitacora("No permitida transicion a estado: Warpeo","Error");
 	}
 	
-	public Disponible() {
+	public Disponible(Nave nave) {
 		super();
+		this.nave = nave;
+		this.asistente = nave.getAsistente();
 	}
 }

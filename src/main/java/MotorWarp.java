@@ -1,28 +1,40 @@
 public class MotorWarp{
 	private EstadoMotor estado;
+	private String nombreEstado;
+	private Nave nave;
 
-	public MotorWarp(EstadoMotor estado) {
-		super();
-		this.estado = new Disponible();
+	protected String getNombreEstado() {
+		return this.nombreEstado;
 	}
-	
-	protected EstadoMotor getEstado() {
-		return estado;
+	public void setNombreEstado(String nombreEstado) {
+		this.nombreEstado = nombreEstado;
 	}
-	protected void setEstado(EstadoMotor estado) {
+	public void setEstado(EstadoMotor estado) {
 		this.estado = estado;
 	}
 
+	protected void aplicarCostos(int combustible, int desgaste, int energia ){
+		this.nave.consumirCombustible(combustible);
+		this.nave.aumentarDesgaste(desgaste);
+		this.nave.cargarEnergia(energia);
+	}
+
+	protected boolean disponibleParaSaltar(){
+		return this.nombreEstado.equals("Disponible");
+	}
+
 	protected void pedirDisponibilidad() {
-		estado.dejarDisponible(this);
+		estado.cerrar(this);
 	}
-	protected void pedirPrepararSalto() {
-		estado.prepararSalto(this);
+	protected void pedirPrepararSalto() { estado.preparar(this); }
+	protected void pedirWarp() {
+		estado.saltar(this);
 	}
-	protected void pedirWarpeo() {
-		estado.warpear(this);
-	}
-	protected void pedirEnfriamiento() {
-		estado.enfriar(this);
+	//protected void pedirEnfriamiento() { estado.enfriar(this); }
+
+	public MotorWarp(Nave nave) {
+		this.estado = new Disponible(nave);
+		this.nave = nave;
+		this.nombreEstado = "Disponible";
 	}
 }

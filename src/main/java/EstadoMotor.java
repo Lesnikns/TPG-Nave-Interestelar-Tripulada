@@ -1,6 +1,6 @@
 public interface EstadoMotor {
-	void dejarDisponible(MotorWarp motor);
-	void prepararSalto(MotorWarp motor);
-	void warpear(MotorWarp motor);
-	void enfriar(MotorWarp motor);
+	void cerrar(MotorWarp motor);
+	void preparar(MotorWarp motor);
+	void saltar(MotorWarp motor);
+	//void enfriar(MotorWarp motor); //metodo enfriar se definira en la entrega 2
 }

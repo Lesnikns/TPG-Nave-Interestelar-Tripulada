@@ -1,23 +1,25 @@
 public class EnWarp implements EstadoMotor {
+	private Nave nave;
+	private AsistenteDeComando asistente;
 
 	@Override
-	public void dejarDisponible(MotorWarp motor) {
-		//registrar en bitacora invalida
+	public void cerrar(MotorWarp motor) {
+		motor.setEstado(new Disponible(this.nave));
+		motor.setNombreEstado("EnWarp");
+		asistente.escribeBitacora("transicion a estado: Preparacion de salto","Transicion");
 	}
 	@Override
-	public void prepararSalto(MotorWarp motor) {
-		//bitacora
+	public void preparar(MotorWarp motor) {
+		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
 	@Override
-	public void warpear(MotorWarp motor) {
-		//bitacora
-	}
-	@Override
-	public void enfriar(MotorWarp motor) {
-		motor.setEstado(new Enfriamiento());
+	public void saltar(MotorWarp motor) {
+		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
 	
-	public EnWarp() {
+	public EnWarp(Nave nave) {
 		super();
+		this.nave = nave;
+		this.asistente = nave.getAsistente();
 	}
 }

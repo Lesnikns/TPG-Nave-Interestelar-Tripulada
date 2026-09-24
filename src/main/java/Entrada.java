@@ -1,23 +1,24 @@
+import java.util.Date;
+
 public class Entrada {
-	private static int cont = -1;
-	protected String tipo;
-	protected String fecha; 
-	protected int numEnt;
+	private String mensaje;
+	private Date fecha;
+	private String tipo;
 	
+	protected String getMensaje() {
+		return this.mensaje;
+	}
+	protected Date getFecha() {
+		return this.fecha;
+	}
 	protected String getTipo() {
-		return tipo;
+		return this.tipo;
 	}
-	protected String getFecha() {
-		return fecha;
-	}
-	protected int getNumEnt() {
-		return numEnt;
-	}
-	public Entrada(String tipo, String fecha) {
+
+	public Entrada(String mensaje, String tipo) {
 		super();
-		cont++;
+		this.mensaje = mensaje;
 		this.tipo = tipo;
-		this.fecha = fecha;
-		this.numEnt = cont;
+		this.fecha = new Date();
 	}
 }
