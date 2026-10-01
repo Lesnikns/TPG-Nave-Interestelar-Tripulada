@@ -54,7 +54,8 @@ public class AsistenteDeComando {
      */
     public void ejecutarSaltoYCostos(int combustible, int desgaste) {
         nave.getMotor().pedirPrepararSalto();
-        nave.getMotor().aplicarCostos(combustible, desgaste, 0);
+        nave.consumirCombustible(combustible);
+        nave.aumentarDesgaste(desgaste);
         nave.getMotor().pedirWarp();
     }
     /**
@@ -71,19 +72,25 @@ public class AsistenteDeComando {
         nave.cargarEnergia(cantidad);
     }
     /**
-     * Delega el inicio de la misión solicitada, actuando como coordinador.
+     * Delega el inicio de la misión solicitada, actuando como coordinador y manejando posibles fallos.
      *
      * PRECONDICIÓN: La misión proporcionada (m) no es nula. El asistente cuenta con
      * una nave y una bitácora inicializadas y válidas.
      *
-     * POSTCONDICIÓN: Se invocó el ciclo de la misión. El saldo final de recursos y los
-     * registros de la bitácora dependerán del éxito o fracaso de la misión ejecutada.
+     * POSTCONDICIÓN: Se invocó el ciclo de la misión. Si ocurre una excepción por falta de recursos
+     * o indisponibilidad del motor, el error es atrapado y gestionado internamente sin interrumpir
+     * la ejecución del programa principal. El saldo final de recursos y los registros en la bitácora
+     * dependerán del éxito o fracaso de la operación.
      *
      * @param m Objeto misión que se desea ejecutar.
-     * @throws Exception Si ocurre un fallo en los recursos o disponibilidad del motor.
      */
-    public void coordinarMision(Mision m) throws Exception {
-        m.IniciarMision(this);
+    public void coordinarMision(Mision m) {
+        try {
+            m.IniciarMision(this);
+
+        } catch (Exception e) {
+            System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
+        }
     }
     /**
      * Inscribe un nuevo evento en el registro histórico del asistente.

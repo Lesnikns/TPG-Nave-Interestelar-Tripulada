@@ -7,17 +7,35 @@ public abstract class Mision {
     protected int desgaste; // Costo operativo
 
     // Getters
-    public int getId() { return id; }
-    public String getDescripcion() { return descripcion; }
-    public String getDestino() { return destino; }
-    public int getCombustible() { return combustible; }
-    public int getEnergia() { return energia; }
+    public int getId() {
+        return id;
+    }
+    public String getDescripcion() {
+        return descripcion;
+    }
+    public String getDestino() {
+        return destino;
+    }
+    public int getCombustible() {
+        return combustible;
+    }
+    public int getEnergia() {
+        return energia;
+    }
 
     // Setters
-    public void setDestino(String destino) { this.destino = destino; }
-    public void setCombustible(int combustible) { this.combustible = combustible; }
-    public void setEnergia(int energia) { this.energia = energia; }
-    public void setDesgaste(int desgaste) { this.desgaste = desgaste; }
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
+    public void setCombustible(int combustible) {
+        this.combustible = combustible;
+    }
+    public void setEnergia(int energia) {
+        this.energia = energia;
+    }
+    public void setDesgaste(int desgaste) {
+        this.desgaste = desgaste;
+    }
 
     public Mision(int id, String descripcion, String destino) {
         this.id = id;
