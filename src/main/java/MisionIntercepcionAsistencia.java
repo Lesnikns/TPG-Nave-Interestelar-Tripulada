@@ -1,5 +1,4 @@
-public class MisionIntercepcionAsistencia extends Mision{
-
+public class MisionIntercepcionAsistencia extends Mision {
 
     public MisionIntercepcionAsistencia(int id, String destino) {
         super(id, "Intercepción y asistencia", destino);
@@ -7,17 +6,16 @@ public class MisionIntercepcionAsistencia extends Mision{
     }
 
     @Override
-    public void aplicarConsecuencias(AsistenteDeComando asistente) {
-        asistente.getNave().recargarEnergia(this.energia);
-        asistente.escribeBitacora("Bonificación: +5 Energía por éxito en M-01.", "EVENTO");
+    public void ejecutarMision(AsistenteDeComando asistente) {
+        System.out.println("Ejecutando intercepción y asistencia...");
+        asistente.escribeBitacora("Ejecutando la mision de intercepcion y asistencia", "EVENTO");
+
+        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
     }
 
     @Override
-    public void ejecutarMision(AsistenteDeComando asistente) {
-        asistente.escribeBitacora("Ejecutando la mision de intercepcion y asistencia", "EVENTO");
-        System.out.print("Ejecutando intercepción y asistencia");
+    public void aplicarConsecuencias(AsistenteDeComando asistente) {
+        asistente.cargarEnergiaNave(this.energia);
+        asistente.escribeBitacora("Bonificación: +5 Energía por éxito en M-01.", "EVENTO");
     }
-
-
-
 }
