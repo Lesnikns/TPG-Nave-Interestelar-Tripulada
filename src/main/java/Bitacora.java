@@ -14,13 +14,13 @@ public class Bitacora {
 
 	@Override
 	public String toString() {
-		String log = new String();
+		String log = "";
 		for  (Entrada entrada : this.entradas)
-			log += entrada.toString() + "\n";
+			log = log + entrada.toString() + "\n"; //funcionara?
 		return log;
 	}
 
-	public Bitacora(ArrayList<Entrada> entradas) {
+	public Bitacora() {
 		super();
 		this.entradas = new ArrayList<>();
 	}
