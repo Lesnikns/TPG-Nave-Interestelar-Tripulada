@@ -16,7 +16,11 @@ public class EnWarp implements EstadoMotor {
 	public void saltar(MotorWarp motor) {
 		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
-	
+	@Override
+	public void enfriar(MotorWarp motor) {
+		//no se definira hasta 2da entrega
+	}
+
 	public EnWarp(Nave nave) {
 		super();
 		this.nave = nave;

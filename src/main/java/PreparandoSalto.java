@@ -16,7 +16,10 @@ public class PreparandoSalto implements EstadoMotor {
 	public void saltar(MotorWarp motor) {
 		asistente.escribeBitacora("No permitida transicion a estado: Disponible","Error");
 	}
-	
+	@Override
+	public void enfriar(MotorWarp motor) {
+	}
+
 	public PreparandoSalto(Nave nave) {
 		super();
 		this.nave = nave;

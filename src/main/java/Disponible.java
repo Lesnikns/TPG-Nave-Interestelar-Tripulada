@@ -16,7 +16,10 @@ public class Disponible implements EstadoMotor {
 	public void saltar(MotorWarp motor) {
 		asistente.escribeBitacora("No permitida transicion a estado: Warpeo","Error");
 	}
-	
+	@Override
+	public void enfriar(MotorWarp motor) {
+	}
+
 	public Disponible(Nave nave) {
 		super();
 		this.nave = nave;

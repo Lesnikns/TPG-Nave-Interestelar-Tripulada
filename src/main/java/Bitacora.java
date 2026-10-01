@@ -16,7 +16,7 @@ public class Bitacora {
 	public String toString() {
 		String log = "";
 		for  (Entrada entrada : this.entradas)
-			log = log + entrada.toString() + "\n"; //funcionara?
+			log += entrada.toString() + "\n"; //funcionara?
 		return log;
 	}
 
