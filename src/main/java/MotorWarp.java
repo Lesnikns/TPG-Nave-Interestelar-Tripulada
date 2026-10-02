@@ -1,5 +1,13 @@
 /**
- * (El javadoc que define a la clase motor ira aca)
+ * Motor warp de una nave. Es el contexto del patron State: delega en su estado actual (EstadoMotor) el comportamiento de cada accion
+ * (preparar salto, saltar, cerrar, enfriar), de modo que la nave no necesita condicionales por estado (R3 de la aclaracion del TP, E1-02).
+ * El motor puede estar en cuatro estados: Disponible, PreparandoSalto, EnWarp y Enfriamiento, y siempre arranca en Disponible.
+ * Solo se puede pasar de un estado a otro por las transiciones validas: Disponible -&gt; PreparandoSalto -&gt; EnWarp -&gt; (Enfriamiento) -&gt; Disponible.
+ * Como todavia no se modela el paso del tiempo, un motor EnWarp vuelve a Disponible cuando termina el salto; Enfriamiento existe pero todavia no se usa.
+ * Una accion no permitida en el estado actual no tiene efecto sobre la nave y queda registrada como error en la bitacora (no se aceptan transiciones invalidas silenciosas).
+ * <b>invariantes:</b> estado != null y es uno de los cuatro estados definidos <br>
+ * nombreEstado != null, nombreEstado != "" y coincide con el estado concreto actual ("Disponible","PreparandoSalto","EnWarp","Enfriamiento") <br>
+ * nave != null
  */
 public class MotorWarp{
 	private EstadoMotor estado;
@@ -60,7 +68,7 @@ public class MotorWarp{
 	 * <b>post:</b> en caso ideal se ha comenzado la preparacion del salto, caso contrario se ha registrado la transicion erronea
 	 */
 	protected void pedirPrepararSalto() {
-		estado.preparar(this);
+		estado.prepararSalto(this);
 	}
 	/**
 	 * Se pedira la preparacion para saltar, entrando en estado EnWarp idealmente (sino se registrara error en la transicion)
@@ -73,9 +81,11 @@ public class MotorWarp{
 
 	/**
 	 * Se pide preparacion para enfriar luego de salto (aun no definido, pues en 1er entrega estado de enfriamiento aun no estara definido)
+	 * <b>pre:</b> estado no nulo, y deberia estar en EnWarp para caso idoneo <br>
+	 * <b>post:</b> en la entrega 1 no tiene efecto sobre el motor ni sobre la nave; a partir de la entrega 2, en caso ideal se llevara al estado Enfriamiento, caso contrario se registrara transicion erronea
 	 */
 	protected void pedirEnfriamiento() {
-		//estado.enfriar(this);
+		estado.enfriar(this); //no definido hasta 2da entrega
 	}
 
 	/**
