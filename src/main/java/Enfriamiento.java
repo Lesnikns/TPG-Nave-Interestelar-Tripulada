@@ -1,6 +1,6 @@
 /**
  * Cuarto estado del motor warp (patron State): el motor se enfria luego de un salto.
- * Debe existir aunque todavia no se use (R3 de la aclaracion del TP); su comportamiento se define en la entrega 2.
+ * Debe existir aunque todavia no se use, su comportamiento se define en la entrega 2.
  * Su unica salida prevista es "pasa un tiempo" -&gt; Disponible, que no corresponde a ninguna de las cuatro acciones de EstadoMotor y todavia no se modela.
  * Por eso, cuando el estado entre en uso, cerrar, preparar, saltar y enfriar seran transiciones invalidas: no tendran efecto sobre la nave y quedaran registradas como error en la bitacora.
  * <b>invariantes:</b> pendientes hasta la entrega 2 (el estado necesitara la nave y su asistente de comando para registrar eventos, como el resto de los estados)

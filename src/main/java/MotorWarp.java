@@ -1,6 +1,6 @@
 /**
  * Motor warp de una nave. Es el contexto del patron State: delega en su estado actual (EstadoMotor) el comportamiento de cada accion
- * (preparar salto, saltar, cerrar, enfriar), de modo que la nave no necesita condicionales por estado (R3 de la aclaracion del TP, E1-02).
+ * (preparar salto, saltar, cerrar, enfriar), de modo que la nave no necesita condicionales por estado.
  * El motor puede estar en cuatro estados: Disponible, PreparandoSalto, EnWarp y Enfriamiento, y siempre arranca en Disponible.
  * Solo se puede pasar de un estado a otro por las transiciones validas: Disponible -&gt; PreparandoSalto -&gt; EnWarp -&gt; (Enfriamiento) -&gt; Disponible.
  * Como todavia no se modela el paso del tiempo, un motor EnWarp vuelve a Disponible cuando termina el salto; Enfriamiento existe pero todavia no se usa.

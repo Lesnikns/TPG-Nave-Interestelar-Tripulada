@@ -2,8 +2,8 @@ import java.util.Date;
 
 /**
  * Representa un evento registrado en la bitacora de un asistente de comando: que paso (mensaje), de que clase fue (tipo) y cuando sucedio (fecha).
- * Una entrada es inmutable: una vez creada no puede modificarse (R5 de la aclaracion del TP). Los tipos usados hasta ahora son "Error" y "Transicion";
- * segun E1-05 tambien corresponde registrar ejecucion de misiones, resultados y operaciones sobre recursos.
+ * Una entrada es inmutable: una vez creada no puede modificarse. Los tipos usados hasta ahora son "Error" y "Transicion";
+ * tambien corresponde registrar ejecucion de misiones, resultados y operaciones sobre recursos.
  * <b>invariantes:</b> mensaje != null y mensaje != "" <br>
  * tipo != null y tipo != "" <br>
  * fecha != null, fijada en el instante de creacion y sin cambios posteriores

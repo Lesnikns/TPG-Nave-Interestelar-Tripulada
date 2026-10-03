@@ -22,7 +22,7 @@ public class Disponible implements EstadoMotor {
 	/**
 	 * Inicia la preparacion de un salto (transicion valida desde Disponible)
 	 * <b>pre:</b> motor != null y el estado actual del motor es Disponible <br>
-	 * <b>post:</b> el motor paso al estado PreparandoSalto, con nombre de estado "PreparandoSalto", y se registro en la bitacora un evento de tipo "Transicion"
+	 * <b>post:</b> el motor paso al estado PreparandoSalto, con nombre de estado "Preparando salto", y se registro en la bitacora un evento de tipo "Transicion"
 	 * @param motor - motor warp que cambiara de estado. motor != null
 	 */
 	@Override

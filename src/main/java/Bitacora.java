@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 /**
  * Bitacora de un asistente de comando: registro cronologico de los eventos que ocurren en la nave que opera (cambios del motor warp, errores,
- * ejecucion de misiones y sus resultados, operaciones sobre recursos). Debe servir como informe de lo ocurrido en cada mision (R5 de la aclaracion del TP, E1-05).
+ * ejecucion de misiones y sus resultados, operaciones sobre recursos). Debe servir como informe de lo ocurrido en cada mision.
  * Cada asistente lleva su propia bitacora. Los eventos se agregan siempre al final, por lo que se pueden consultar en orden temporal, y una vez registrados no se modifican ni se eliminan.
  * <b>invariantes:</b> entradas != null <br>
  * ninguna entrada es nula <br>
@@ -42,7 +42,7 @@ public class Bitacora {
 	public String toString() {
 		String log = "";
 		for  (Entrada entrada : this.entradas) {
-			log += entrada.toString(); //funcionara?
+			log += entrada.toString();
 		}
 		return log;
 	}
