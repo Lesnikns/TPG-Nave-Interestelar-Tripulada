@@ -1,12 +1,12 @@
-public abstract class FabricaDeNaves {
-    public static Nave getNave(String tipo) {
+public class FabricaDeNaves {
+    public Nave getNave(String tipo) throws TipoDeNaveInvalidoException {
         return switch (tipo) {
             case "carguero" -> new NaveCarguero();
             case "combate" -> new NaveDeCombate();
             case "exploradora" -> new NaveExploradora();
-            default -> null; //debería lanzar excepción
+            default -> throw new TipoDeNaveInvalidoException(tipo);
         };
     }
-    //Para agregar un nuevo tipo de Nave debería modificar este factory, lo que violaría sOlid ...
-    // es un defecto del patron simple Factory, que es lo que estoy seguro de que exige el enunciado, pero hay algunos enfoques que pueden solucionarlo con ciertas consecuencias.
 }
+//quité el static y abstract para poder sobreescribir el método y usar super() si la extiendo
+// ese cambio implica tener que instanciar la fábrica (revisar que no se mencione que deba ser única)
