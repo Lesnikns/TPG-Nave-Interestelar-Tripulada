@@ -5,4 +5,5 @@ public interface Tripulante{
 	public String getOrigen();
 	public double getSueldo();
 	public String getDescripcion();
+	public String getCargo();
 }

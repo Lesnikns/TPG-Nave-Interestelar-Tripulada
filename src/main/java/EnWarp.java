@@ -4,11 +4,9 @@
  * El enfriamiento posterior al salto (EnWarp -&gt; Enfriamiento) se define en la entrega 2. Cualquier otra accion es una transicion invalida:
  * no tiene efecto sobre la nave y queda registrada como error en la bitacora a traves del asistente de comando.
  * <b>invariantes:</b> nave != null <br>
- * asistente != null (es el asistente que opera esa misma nave)
  */
 public class EnWarp implements EstadoMotor {
 	private Nave nave;
-	private AsistenteDeComando asistente;
 
 	/**
 	 * Cierra el salto en curso, devolviendo el motor a Disponible (transicion valida desde EnWarp)
@@ -20,7 +18,7 @@ public class EnWarp implements EstadoMotor {
 	public void cerrar(MotorWarp motor) {
 		motor.setEstado(new Disponible(this.nave));
 		motor.setNombreEstado(nomEstados[0]);
-		asistente.escribeBitacora("transicion a estado: " + nomEstados[0],"Transicion");
+		this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[0],"Transicion");
 	}
 	/**
 	 * Intenta preparar un salto. No es una accion valida en EnWarp, ya que hay un salto en curso
@@ -30,7 +28,7 @@ public class EnWarp implements EstadoMotor {
 	 */
 	@Override
 	public void prepararSalto(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[1],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[1],"Error");
 	}
 	/**
 	 * Intenta saltar. No es una accion valida en EnWarp, ya que el salto ya esta en curso
@@ -40,7 +38,7 @@ public class EnWarp implements EstadoMotor {
 	 */
 	@Override
 	public void saltar(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[2],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[2],"Error");
 	}
 	/**
 	 * Enfria el motor luego del salto (EnWarp -&gt; Enfriamiento). Su comportamiento no se define hasta la entrega 2: el estado Enfriamiento existe pero todavia no se usa
@@ -62,6 +60,5 @@ public class EnWarp implements EstadoMotor {
 	public EnWarp(Nave nave) {
 		super();
 		this.nave = nave;
-		this.asistente = nave.getAsistente();
 	}
 }

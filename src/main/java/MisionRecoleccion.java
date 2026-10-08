@@ -1,7 +1,7 @@
 public class MisionRecoleccion extends Mision {
 
-    public MisionRecoleccion(int id, String destino) {
-        super(id, "Recoleccion", destino);
+    public MisionRecoleccion(int id,String descripcion, String destino) {
+        super(id, descripcion, destino);
         this.energia = 5;
     }
 

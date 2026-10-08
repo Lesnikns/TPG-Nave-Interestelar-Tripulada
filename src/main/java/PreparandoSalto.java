@@ -3,12 +3,9 @@
  * Es el unico estado desde el cual se permite saltar (transicion PreparandoSalto -&gt; EnWarp). Cualquier otra accion es una transicion invalida:
  * no tiene efecto sobre la nave y queda registrada como error en la bitacora a traves del asistente de comando.
  * <b>invariantes:</b> nave != null <br>
- * asistente != null (es el asistente que opera esa misma nave)
  */
 public class PreparandoSalto implements EstadoMotor {
 	private Nave nave;
-	private AsistenteDeComando asistente;
-
 	/**
 	 * Intenta cerrar el motor. No es una accion valida en PreparandoSalto, ya que solo se cierra un salto en curso (desde EnWarp)
 	 * <b>pre:</b> motor != null <br>
@@ -17,7 +14,7 @@ public class PreparandoSalto implements EstadoMotor {
 	 */
 	@Override
 	public void cerrar(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[0],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[0],"Error");
 	}
 	/**
 	 * Intenta preparar un salto. No es una accion valida en PreparandoSalto, ya que la preparacion ya fue iniciada
@@ -27,7 +24,7 @@ public class PreparandoSalto implements EstadoMotor {
 	 */
 	@Override
 	public void prepararSalto(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[1],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[1],"Error");
 	}
 	/**
 	 * Concreta el salto (transicion valida desde PreparandoSalto)
@@ -39,7 +36,7 @@ public class PreparandoSalto implements EstadoMotor {
 	public void saltar(MotorWarp motor) {
 		motor.setEstado(new EnWarp(this.nave));
 		motor.setNombreEstado(nomEstados[2]);
-		asistente.escribeBitacora("transicion a estado: " + nomEstados[2],"Transicion");
+		this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[2],"Transicion");
 	}
 	/**
 	 * Intenta enfriar el motor. No es una accion valida en PreparandoSalto, ya que solo se enfria un motor que realizo un salto
@@ -49,7 +46,7 @@ public class PreparandoSalto implements EstadoMotor {
 	 */
 	@Override
 	public void enfriar(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[3],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[3],"Error");
 	}
 
 	/**
@@ -61,6 +58,5 @@ public class PreparandoSalto implements EstadoMotor {
 	public PreparandoSalto(Nave nave) {
 		super();
 		this.nave = nave;
-		this.asistente = nave.getAsistente();
 	}
 }

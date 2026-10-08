@@ -1,7 +1,7 @@
 public class MisionIntercepcionAsistencia extends Mision {
 
-    public MisionIntercepcionAsistencia(int id, String destino) {
-        super(id, "Intercepción y asistencia", destino);
+    public MisionIntercepcionAsistencia(int id,String descripcion, String destino) {
+        super(id, descripcion, destino);
         this.energia = 5;
     }
 

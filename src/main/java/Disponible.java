@@ -3,11 +3,9 @@
  * Es el unico estado desde el cual se permite preparar un salto (transicion Disponible -&gt; PreparandoSalto). Cualquier otra accion es una transicion invalida:
  * no tiene efecto sobre la nave y queda registrada como error en la bitacora a traves del asistente de comando.
  * <b>invariantes:</b> nave != null <br>
- * asistente != null (es el asistente que opera esa misma nave)
  */
 public class Disponible implements EstadoMotor {
 	private Nave nave;
-	private AsistenteDeComando asistente;
 
 	/**
 	 * Intenta cerrar el motor. No es una accion valida en Disponible, ya que solo se cierra un salto en curso (desde EnWarp)
@@ -17,7 +15,7 @@ public class Disponible implements EstadoMotor {
 	 */
 	@Override
 	public void cerrar(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[0],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[0],"Error");
 	}
 	/**
 	 * Inicia la preparacion de un salto (transicion valida desde Disponible)
@@ -29,7 +27,7 @@ public class Disponible implements EstadoMotor {
 	public void prepararSalto(MotorWarp motor) {
 		motor.setEstado(new PreparandoSalto(this.nave));
 		motor.setNombreEstado(nomEstados[1]);
-		asistente.escribeBitacora("transicion a estado: " + nomEstados[1],"Transicion");
+		this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[1],"Transicion");
 	}
 	/**
 	 * Intenta saltar. No es una accion valida en Disponible, ya que antes hay que preparar el salto
@@ -39,7 +37,7 @@ public class Disponible implements EstadoMotor {
 	 */
 	@Override
 	public void saltar(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[2],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[2],"Error");
 	}
 	/**
 	 * Intenta enfriar el motor. No es una accion valida en Disponible, ya que solo se enfria un motor que realizo un salto
@@ -49,7 +47,7 @@ public class Disponible implements EstadoMotor {
 	 */
 	@Override
 	public void enfriar(MotorWarp motor) {
-		asistente.escribeBitacora("No permitida transicion a estado: " + nomEstados[3],"Error");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[3],"Error");
 	}
 
 	/**
@@ -61,6 +59,5 @@ public class Disponible implements EstadoMotor {
 	public Disponible(Nave nave) {
 		super();
 		this.nave = nave;
-		this.asistente = nave.getAsistente();
 	}
 }

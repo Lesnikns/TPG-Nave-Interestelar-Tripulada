@@ -22,6 +22,9 @@ public abstract class Mision {
     public int getEnergia() {
         return energia;
     }
+    public int getDesgaste() {
+        return desgaste;
+    }
 
     // Setters
     public void setDestino(String destino) {
@@ -47,83 +50,63 @@ public abstract class Mision {
     }
 
     /**
-     * Template Method que define el ciclo de vida inalterable de una misión.
+     * Template Method que define el ciclo de vida inalterable de una mision.
+     * <b>pre:</b> asistente != null y tiene una nave asignada <br>
+     * <b>post:</b> se ejecuto estrictamente la secuencia: preparar, ejecutar, consecuencias y finalizar. La bitacora y los recursos reflejan la operacion
      *
-     * PRECONDICIÓN: El asistente proporcionado no es nulo y tiene una nave asignada.
-     *
-     * POSTCONDICIÓN: Se ejecutó estrictamente la secuencia: preparar, ejecutar,
-     * consecuencias y finalizar. La bitácora y los recursos reflejan la operación.
-     *
-     * @param asistente El coordinador a través del cual la misión operará.
-     * @throws Exception Si la misión es abortada por falta de recursos o disponibilidad.
+     * @param asistente - coordinador a traves del cual la mision operara. asistente != null
+     * @throws Exception si la mision es abortada por falta de recursos o disponibilidad del motor
      */
-    public final void IniciarMision(AsistenteDeComando asistente) throws Exception {
+    public final void iniciarMision(AsistenteDeComando asistente) throws Exception {
         prepararMision(asistente);
         ejecutarMision(asistente);
         aplicarConsecuencias(asistente);
         finalizarMision(asistente);
     }
+
     /**
-     * Valida que la nave esté en condiciones operativas antes de actuar.
+     * Valida que la nave este en condiciones operativas antes de actuar.
+     * <b>pre:</b> asistente != null <br>
+     * <b>post:</b> si la validacion de recursos y motor es exitosa, la mision es autorizada. Si falla, se lanza una excepcion, el estado de la nave permanece intacto y se aborta la ejecucion
      *
-     * PRECONDICIÓN: El asistente proporcionado no debe ser nulo.
-     *
-     * POSTCONDICIÓN: Si la validación de recursos y motor es exitosa, la misión es
-     * autorizada. Si alguna verificación falla, se lanza una excepción y el estado
-     * de la nave permanece intacto, abortando la ejecución parcial.
-     *
-     * @param asistente El coordinador encargado de validar a la nave.
-     * @throws Exception Si el combustible es insuficiente, se supera el límite de
-     * desgaste, o si el motor no se encuentra "Disponible".
+     * @param asistente - coordinador encargado de validar a la nave. asistente != null
+     * @throws Exception si la nave no esta operativa, recursos son insuficientes o el motor no se encuentra "Disponible"
      */
     public void prepararMision(AsistenteDeComando asistente) throws Exception {
         System.out.println("Iniciando mision " + this.descripcion);
         asistente.escribeBitacora("Iniciando mision M-0" + this.id + ": " + this.descripcion, "EVENTO");
 
-        // La mision verifica recursos y disponibilidad a traves del asistente
-        if (!asistente.verificarRecursos(this.combustible, this.desgaste)) {
-            asistente.escribeBitacora("Misión abortada: Recursos insuficientes (combustible o desgaste)", "ERROR");
-            throw new Exception("Recursos insuficientes para la misión.");
-        }
+        asistente.verificarRecursos(this.combustible, this.desgaste);
 
         if (!asistente.verificarMotorDisponible()) {
-            asistente.escribeBitacora("Misión abortada: Motor no disponible", "ERROR");
-            throw new Exception("Motor no disponible para salto");
+            throw new Exception("Motor no disponible para salto warp.");
         }
     }
+
     /**
-     * Ejecuta las acciones específicas de la misión concreta (implementado en subclases).
+     * Ejecuta las acciones especificas de la mision concreta (implementado en subclases).
+     * <b>pre:</b> la mision supero con exito las validaciones de prepararMision. asistente != null <br>
+     * <b>post:</b> se le ordeno al asistente realizar el salto y cobrar los costos operativos (combustible y desgaste). Se imprimieron los reportes correspondientes
      *
-     * PRECONDICIÓN: La misión superó con éxito las validaciones de 'prepararMision'.
-     *
-     * POSTCONDICIÓN: Se le ordenó al asistente realizar el salto y cobrar los costos
-     * operativos (combustible y desgaste). Se imprimieron los reportes correspondientes.
-     *
-     * @param asistente El coordinador que ordenará el salto a la nave.
+     * @param asistente - coordinador que ordenara el salto a la nave. asistente != null
      */
     public abstract void ejecutarMision(AsistenteDeComando asistente);
 
     /**
-     * Otorga las bonificaciones correspondientes al cumplimiento de la misión.
+     * Otorga las bonificaciones correspondientes al cumplimiento de la mision.
+     * <b>pre:</b> la etapa ejecutarMision concluyo de manera exitosa. asistente != null <br>
+     * <b>post:</b> se le ordeno al asistente recargar la energia de la nave si la mision lo estipula, dejando registro en la bitacora
      *
-     * PRECONDICIÓN: La etapa 'ejecutarMision' concluyó de manera exitosa.
-     *
-     * POSTCONDICIÓN: Se le ordenó al asistente recargar la energía de la nave si la misión
-     * lo estipula, dejando registro en la bitácora.
-     *
-     * @param asistente El coordinador encargado de recargar la energía.
+     * @param asistente - coordinador encargado de recargar la energia. asistente != null
      */
     public abstract void aplicarConsecuencias(AsistenteDeComando asistente);
 
     /**
-     * Da por concluida formalmente la operación y asienta el cierre en el registro.
+     * Da por concluida formalmente la operacion y asienta el cierre en el registro.
+     * <b>pre:</b> las etapas previas finalizaron correctamente sin excepciones. asistente != null <br>
+     * <b>post:</b> la mision emitio su informe de finalizacion exitosa a traves de la consola y lo anexo como entrada definitiva en la bitacora
      *
-     * PRECONDICIÓN: Las etapas previas finalizaron correctamente sin excepciones.
-     *
-     * POSTCONDICIÓN: La misión emitió su informe de finalización exitosa a través de
-     * la consola y lo anexó como entrada definitiva en la bitácora.
-     *
-     * @param asistente El coordinador donde se registrará el evento de cierre.
+     * @param asistente - coordinador donde se registrara el evento de cierre. asistente != null
      */
     private void finalizarMision(AsistenteDeComando asistente) {
         asistente.escribeBitacora("Mision M-0" + this.id + " finalizada con exito", "EVENTO");

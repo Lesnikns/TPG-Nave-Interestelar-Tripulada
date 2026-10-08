@@ -1,7 +1,7 @@
 public class MisionRetornoSeguro extends Mision {
 
-    public MisionRetornoSeguro(int id, String destino) {
-        super(id, "Retorno Seguro", destino);
+    public MisionRetornoSeguro(int id,String descripcion, String destino) {
+        super(id, descripcion, destino);
     }
 
     @Override

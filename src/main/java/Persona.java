@@ -17,7 +17,11 @@ public abstract class Persona implements Tripulante{
 		
 		this.nombre = nombre;
 	}
-	
+
+	@Override
+	public String getCargo() {
+		return "Sin cargo";
+	}
 	public String getNombre() {
 		return nombre;
 	}
