@@ -258,56 +258,56 @@ public abstract class Nave {
     public boolean enEstadoOperativo() {
         return !requiereMantenimiento();
     }
-
-    //--- Subsección de costos simultáneos -> Asistente de Comando debe tener equivalentes y delegarlos a estos.
-
-    /**
-     * Indica si la nave puede absorber los tres costos indicados a la vez,
-     * sin modificarla.
-     *
-     * Precondición: ninguna.
-     *
-     * Postcondición: la nave no se modifica; el resultado es exactamente
-     *  (0 <= combustible <= this.combustible)
-     *  && (0 <= energia <= this.energia)
-     *  && (0 <= desgaste <= DESGASTE_MAX - this.desgaste).
-     *
-     * @return true si los tres costos se podrían aplicar juntos, false si no
-     */
-    public boolean puedeAplicar(int combustible, int desgaste, int energia) {
-        return (combustible >= 0 && combustible <= this.combustible
-                && energia >= 0 && energia <= this.energia
-                && desgaste >= 0 && desgaste <= DESGASTE_MAX - this.desgaste);
-    }
-
-    /**
-     * Intenta aplicar los tres costos a la vez, de forma atómica (todo o
-     * nada): equivale a consumir combustible, consumir energía y aumentar
-     * desgaste en una sola operación, evitando dejar cambios parciales si
-     * alguno de los tres no se pudiera aplicar.
-     *
-     * Precondición: ninguna (la validación la hace puedeAplicar
-     * internamente).
-     *
-     * Postcondición:
-     *  - Si puedeAplicar(combustible, desgaste, energia): los tres
-     *    recursos se actualizan exactamente en los valores indicados y el
-     *    método devuelve true.
-     *  - En caso contrario: la nave no se modifica y el método
-     *    devuelve false.
-     *
-     * @return true si se pudieron aplicar los tres costos, false si no
-     */
-    public boolean aplicarCostos(int combustible, int desgaste, int energia) {
-        if (!puedeAplicar(combustible, desgaste, energia)) {
-            return false;
-        }
-        this.combustible -= combustible;
-        this.energia -= energia;
-        this.desgaste += desgaste;
-
-        return true;
-    }
+// se quita
+//    //--- Subsección de costos simultáneos -> Asistente de Comando debe tener equivalentes y delegarlos a estos.
+//
+//    /**
+//     * Indica si la nave puede absorber los tres costos indicados a la vez,
+//     * sin modificarla.
+//     *
+//     * Precondición: ninguna.
+//     *
+//     * Postcondición: la nave no se modifica; el resultado es exactamente
+//     *  (0 <= combustible <= this.combustible)
+//     *  && (0 <= energia <= this.energia)
+//     *  && (0 <= desgaste <= DESGASTE_MAX - this.desgaste).
+//     *
+//     * @return true si los tres costos se podrían aplicar juntos, false si no
+//     */
+//    public boolean puedeAplicar(int combustible, int desgaste, int energia) {
+//        return (combustible >= 0 && combustible <= this.combustible
+//                && energia >= 0 && energia <= this.energia
+//                && desgaste >= 0 && desgaste <= DESGASTE_MAX - this.desgaste);
+//    }
+//
+//    /**
+//     * Intenta aplicar los tres costos a la vez, de forma atómica (todo o
+//     * nada): equivale a consumir combustible, consumir energía y aumentar
+//     * desgaste en una sola operación, evitando dejar cambios parciales si
+//     * alguno de los tres no se pudiera aplicar.
+//     *
+//     * Precondición: ninguna (la validación la hace puedeAplicar
+//     * internamente).
+//     *
+//     * Postcondición:
+//     *  - Si puedeAplicar(combustible, desgaste, energia): los tres
+//     *    recursos se actualizan exactamente en los valores indicados y el
+//     *    método devuelve true.
+//     *  - En caso contrario: la nave no se modifica y el método
+//     *    devuelve false.
+//     *
+//     * @return true si se pudieron aplicar los tres costos, false si no
+//     */
+//    public boolean aplicarCostos(int combustible, int desgaste, int energia) {
+//        if (!puedeAplicar(combustible, desgaste, energia)) {
+//            return false;
+//        }
+//        this.combustible -= combustible;
+//        this.energia -= energia;
+//        this.desgaste += desgaste;
+//
+//        return true;
+//    }
 
     //- Sección de tripulación
 
@@ -377,5 +377,19 @@ public abstract class Nave {
         }
 
         return hayCapitan && this.getTripulacion().size() >= 5;
+    }
+
+    @Override //para pruebas
+    public String toString() {
+        return "Nave{" +
+                "id=" + id +
+                ", tipo='" + tipo + '\'' +
+                ", combustible=" + combustible +
+                ", energia=" + energia +
+                ", desgaste=" + desgaste +
+                ", motor=" + motor +
+                ", asistente=" + asistente +
+                ", tripulacion=" + tripulacion +
+                '}';
     }
 }
