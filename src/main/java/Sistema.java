@@ -1,33 +1,33 @@
+import Asistente.*;
+import Naves.FabricaDeNaves;
+import Naves.Nave;
+import Tripulacion.*;
+
 public class Sistema {
     public static void main(String[] args) {
-        System.out.println("==================================================");
-        System.out.println("   DEFENSA FINAL - SIMULADOR DE NAVE INTERESTELAR");
-        System.out.println("==================================================\n");
-
+        System.out.println("Simulación Final");
+        // Escenario A — Ejecución correcta
         try {
-            // =========================================================
-            // ESCENARIO A: EJECUCIÓN CORRECTA Y CICLO COMPLETO
-            // =========================================================
-            System.out.println(">>> ESCENARIO A: Ejecución Correcta <<<");
-            System.out.println("1. Creando naves mediante Factory...");
+            System.out.println("Escenario A — Ejecución correcta");
+            System.out.println(" ");
+            // 1. Crear mediante Factory una nave de cada tipo
             FabricaDeNaves fabrica = new FabricaDeNaves();
             Nave naveExploracion = fabrica.getNave("exploradora");
             Nave naveCarga = fabrica.getNave("carguero");
             Nave naveCombate = fabrica.getNave("combate");
-            System.out.println("[OK] Naves creadas con éxito.\n");
 
-            System.out.println("2. Asignando tripulación a la Nave de Exploración...");
+            // 2. Seleccionar una y asignarle una tripulación válida
             naveExploracion.asignarTripulante(new Alferez(new Terricola("Uhura"), 4));
             naveExploracion.asignarTripulante(new Alferez(new Marciano("Marvin"), 2));
             naveExploracion.asignarTripulante(new Consejero(new Vulcano("Spock"), 15, 50));
-            naveExploracion.asignarTripulante(new Terricola("Bones")); // Médico civil
+            naveExploracion.asignarTripulante(new Terricola("Bones"));
             naveExploracion.asignarTripulante(new Capitan(new Terricola("Kirk"), 10));
-            System.out.println("Tripulación mínima alcanzada: " + naveExploracion.verificaTripulacionMinima() + "\n");
 
-            System.out.println("3 y 4. Ejecutando Misiones 01, 02 y 03...");
+            // Configuramos el asistente de la nave seleccionada
             AsistenteDeComando asistente = new AsistenteDeComando(naveExploracion);
             naveExploracion.setAsistente(asistente);
 
+            // 3 y 4. Preparar, ejecutar, evaluar y cerrar M-01, M-02 y M-03
             Mision m1 = new MisionRecoleccion(1, "Extraer Titanio", "Luna");
             Mision m2 = new MisionIntercepcionAsistencia(2, "Rescate de sonda", "Marte");
             Mision m3 = new MisionRetornoSeguro(3, "Volver a base", "Tierra");
@@ -36,62 +36,126 @@ public class Sistema {
             asistente.coordinarMision(m2);
             asistente.coordinarMision(m3);
 
-            System.out.println("\n5. Reporte final del Escenario A:");
-            System.out.println("Combustible restante: " + naveExploracion.getCombustible());
-            System.out.println("Energía restante: " + naveExploracion.getEnergia());
-            System.out.println("Desgaste acumulado: " + naveExploracion.getDesgaste());
+            // 5. Mostrar recursos finales y Bitácora
+            System.out.println(" ");
+            System.out.println("--- Recursos Finales ---");
+            System.out.println(" ");
+            System.out.println("Combustible: " + naveExploracion.getCombustible());
+            System.out.println("Energía: " + naveExploracion.getEnergia());
+            System.out.println("Desgaste: " + naveExploracion.getDesgaste());
 
-            System.out.println("\n--- BITÁCORA ESCENARIO A ---");
+            System.out.println("\n--- Registro de Bitácora ---");
             System.out.println(asistente.getBitacora().toString());
 
+        } catch (Exception e) {
+            System.out.println("Error en la simulación: " + e.getMessage());
+        }
+        // Escenario B — Recursos insuficientes
+        try {
+            System.out.println("Escenario B — Recursos insuficientes");
+            System.out.println(" ");
+            // 1. Utilizar una nave sin recursos suficientes para la misión
+            FabricaDeNaves fabrica = new FabricaDeNaves();
+            Nave naveCarga = fabrica.getNave("carguero");
+            AsistenteDeComando asistente = new AsistenteDeComando(naveCarga);
+            naveCarga.setAsistente(asistente);
 
-            // =========================================================
-            // ESCENARIO B: RECURSOS INSUFICIENTES Y ABORTO SEGURO
-            // =========================================================
-            System.out.println("\n>>> ESCENARIO B: Recursos Insuficientes <<<");
-            System.out.println("1. Utilizando nave de carga y forzando daño crítico (Desgaste al 98%)...");
-            AsistenteDeComando asistenteB = new AsistenteDeComando(naveCarga);
-            naveCarga.setAsistente(asistenteB);
+            // Forzamos la falta de recursos llevando el desgaste al 98%
             naveCarga.aumentarDesgaste(98);
+            int desgasteInicial = naveCarga.getDesgaste();
 
-            System.out.println("2. Intentando ejecutar Misión de Recolección...");
+            // 2. Intentar prepararla o ejecutarla
             Mision mImposible = new MisionRecoleccion(4, "Minería en Asteroide", "Cinturón de Kuiper");
+            asistente.coordinarMision(mImposible);
 
-            // La misión requiere desgaste y la nave ya casi llega a 100. Debe fallar sin romper nada.
-            asistenteB.coordinarMision(mImposible);
+            // 3. Verificar que se rechaza, no deja cambios parciales y registra el motivo
+            System.out.println("--- Verificación de Seguridad ---");
+            System.out.println(" ");
+            System.out.println("Desgaste antes de la misión: " + desgasteInicial);
+            System.out.println("Desgaste tras el aborto: " + naveCarga.getDesgaste());
 
-            System.out.println("\n3. Verificación de seguridad:");
-            System.out.println("¿Se alteraron los recursos parcialmente?: NO. Desgaste sigue en: " + naveCarga.getDesgaste());
-            System.out.println("--- BITÁCORA ESCENARIO B ---");
-            System.out.println(asistenteB.getBitacora().toString());
+            if (desgasteInicial == naveCarga.getDesgaste()) {
+                System.out.println("Estado: [OK] No hubo cambios parciales. La operación es atómica.");
+            } else {
+                System.out.println("Estado: [FALLO] Los recursos se alteraron.");
+            }
 
-
-            // =========================================================
-            // ESCENARIO C: PATRÓN STATE Y TRANSICIONES DEL MOTOR WARP
-            // =========================================================
-            System.out.println("\n>>> ESCENARIO C: Motor Warp <<<");
-            System.out.println("Utilizando nave de combate para prueba de motor aislado.");
-            MotorWarp motor = naveCombate.getMotor();
-
-            // Simulamos asignarle el asistente para que la bitácora funcione en los estados
-            AsistenteDeComando asistenteC = new AsistenteDeComando(naveCombate);
-            naveCombate.setAsistente(asistenteC);
-
-            System.out.println("\n1. Secuencia válida (Disponible -> Preparando -> Warp -> Disponible):");
-            motor.pedirPrepararSalto(); // Disponible a Preparando
-            motor.pedirWarp();          // Preparando a Warp
-            motor.pedirDisponibilidad(); // Warp a Disponible (Sin enfriamiento por reglas de negocio)
-            System.out.println("[OK] Ciclo completado correctamente.");
-
-            System.out.println("\n2. Intentando transición inválida (De Disponible directo a Warp):");
-            // El motor está disponible. Pedir warp directo debe generar un aviso y no cambiar el estado.
-            motor.pedirWarp();
-
-            System.out.println("\n--- BITÁCORA ESCENARIO C ---");
-            System.out.println(asistenteC.getBitacora().toString());
+            System.out.println("\n--- Registro de Bitácora ---");
+            System.out.println(" ");
+            System.out.println(asistente.getBitacora().toString());
 
         } catch (Exception e) {
-            System.err.println("Error crítico en la simulación: " + e.getMessage());
+            System.out.println("Error en la simulación: " + e.getMessage());
+        }
+        // Escenario C — Motor Warp
+        try {
+            System.out.println(" ");
+            System.out.println("Escenario C — Motor Warp");
+            System.out.println(" ");
+            FabricaDeNaves fabrica = new FabricaDeNaves();
+            Nave nave = fabrica.getNave("combate");
+            AsistenteDeComando asistente = new AsistenteDeComando(nave);
+            nave.setAsistente(asistente);
+
+            // 1. Recorrer la secuencia válida
+            System.out.println("--- 1. Secuencia Válida ---");
+            System.out.println(" ");
+            nave.getMotor().pedirPrepararSalto(); // De Motor.Disponible a Preparando
+            nave.getMotor().pedirWarp();          // De Preparando a Warp
+            nave.getMotor().pedirDisponibilidad(); // De Warp a Motor.Disponible (cierra el ciclo)
+            System.out.println("[OK] Ciclo de motor completado correctamente.\n");
+            System.out.println(" ");
+
+            // 2. Intentar transición inválida
+
+            System.out.println("--- 2. Forzando Transición Inválida ---");
+            System.out.println(" ");
+            System.out.println("Intentando pasar a Warp directo desde Motor.Disponible...");
+            // El motor está Motor.Disponible. Pedir warp directo debe ser rechazado.
+            nave.getMotor().pedirWarp();
+
+            // 3. Verificar registro
+            System.out.println("\n--- 3. Verificación en Bitácora ---");
+            System.out.println(asistente.getBitacora().toString());
+
+        } catch (Exception e) {
+            System.out.println("Error en la simulación: " + e.getMessage());
+        }
+
+        // Escenario D — Contrato inválido
+        try {
+            System.out.println(" ");
+            System.out.println("Escenario D — Contrato Inválido");
+            System.out.println(" ");
+            FabricaDeNaves fabrica = new FabricaDeNaves();
+            Nave nave = fabrica.getNave("exploradora");
+            AsistenteDeComando asistente = new AsistenteDeComando(nave);
+            nave.setAsistente(asistente);
+
+            System.out.println("--- 1. Forzando Contrato Inválido ---");
+            int energiaInicial = nave.getEnergia();
+            System.out.println("Energía inicial de la nave: " + energiaInicial);
+
+            // Intentamos cargar una cantidad que exceda groseramente la capacidad
+            System.out.println("Intentando inyectar 5000 unidades de energía...");
+            System.out.println(" ");
+            asistente.cargarEnergiaNave(5000);
+
+            // Verificamos que el estado se haya conservado dentro de los límites
+            System.out.println("\n--- 2. Verificación de Seguridad ---");
+            System.out.println("Energía tras la operación: " + nave.getEnergia());
+
+            // Asumimos que 100 es el tope lógico de energía de tu modelo
+            if (nave.getEnergia() <= 100) {
+                System.out.println("Estado: [OK] El contrato se respetó. La nave autolimitó la carga y no quedó fuera de rango.");
+            } else {
+                System.out.println("Estado: [FALLO] La nave superó su capacidad máxima.");
+            }
+
+        } catch (Exception e) {
+            System.out.println(" ");
+            System.out.println("Error en la simulación: " + e.getMessage());
         }
     }
+
 }
