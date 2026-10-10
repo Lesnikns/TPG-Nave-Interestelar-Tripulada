@@ -6,6 +6,8 @@ import Motor.MotorWarp;
 import Tripulacion.Tripulante;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class Nave {
     private static final int COMBUSTIBLE_MAX = 100;
@@ -270,10 +272,11 @@ public abstract class Nave {
 
     /**
      * Precondición: ninguna.
-     * Postcondición: devuelve la lista de tripulantes de la nave.
+     * Postcondición: devuelve una vista de solo lectura de la tripulación de la nave.
+     * Cualquier intento de modificarla lanza UnsupportedOperationException.
      */
-    public ArrayList<Tripulante> getTripulacion() {
-        return tripulacion;
+    public List<Tripulante> getTripulacion() {
+        return Collections.unmodifiableList(tripulacion);
     }
 
     /**
