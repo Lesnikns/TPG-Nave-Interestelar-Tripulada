@@ -18,7 +18,7 @@ public class Teniente extends CargoDecorator {
 	
 	@Override
 	public String getCargo() {
-		return "Tripulación.Teniente";
+		return "Teniente";
 	}
 	
 	

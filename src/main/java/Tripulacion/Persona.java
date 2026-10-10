@@ -9,7 +9,7 @@ public abstract class Persona implements Tripulante{
 	 * Constructor de una persona sin cargo.
 	 * 
 	 * @pre nombre != null
-	 * @post Crea una nueva persona que será utilizada para aplicarle el decorator Tripulación.CargoDecorator.
+	 * @post Crea una nueva persona que será utilizada para aplicarle el decorator CargoDecorator.
 	 * 
 	 * @param nombre El nombre que tendrá la persona.
 	 */

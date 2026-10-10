@@ -8,7 +8,7 @@ public class Marciano extends Persona {
 	
 	@Override
 	public String getOrigen() {
-		return "Tripulación.Marciano";
+		return "Marciano";
 	}
 	
 	@Override

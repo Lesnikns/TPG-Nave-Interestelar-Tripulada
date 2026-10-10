@@ -7,13 +7,14 @@ public abstract class CargoDecorator implements Tripulante {
 	/**
 	 * Crea un tripulante con cargo a partir de uno que no tenía. 
 	 * 
-	 * @pre t != null, antiguedad >= 0 o nulo.
+	 * @pre t != null, t.getCargo() == "Sin cargo", antiguedad >= 0 o nulo.
 	 * @post Se crea un tripulante decorado con cargo y antiguedad correctamente.
 	 * 
 	 * @param t El tripulante al cual se le va a aplicar el decorator (no debe tener cargo)
 	 * @param antiguedad La antiguedad en años del tripulante.
 	 */
 	public CargoDecorator(Tripulante t, int antiguedad) {
+		assert t.getCargo() == "Sin cargo": "El tripulante no puede tener 2 cargos.";
 		assert t != null : "El tripulante no puede ser nulo";
 	    assert antiguedad >= 0 : "La antiguedad no puede ser negativa";
 	    

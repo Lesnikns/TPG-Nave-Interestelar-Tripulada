@@ -56,6 +56,6 @@ public class Consejero extends CargoDecorator {
 	
 	@Override
 	public String getCargo() {
-		return "Tripulación.Consejero";
+		return "Consejero";
 	}
 }

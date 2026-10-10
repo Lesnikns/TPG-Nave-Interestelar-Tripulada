@@ -8,7 +8,7 @@ public class Vulcano extends Persona{
 	
 	@Override
 	public String getOrigen() {
-		return "Tripulación.Vulcano";
+		return "Vulcano";
 	}
 	
 	@Override
