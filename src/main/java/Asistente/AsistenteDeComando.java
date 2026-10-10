@@ -5,6 +5,7 @@ import Excepciones.DesgasteCriticoException;
 import Excepciones.MotorNoDisponibleException;
 import Excepciones.NaveNoOperativaException;
 import Naves.Nave;
+import Tripulacion.Tripulante;
 
 public class AsistenteDeComando {
     private final Nave nave;
@@ -123,5 +124,24 @@ public class AsistenteDeComando {
      */
     public void cargarEnergiaNave(int energia) {
         nave.cargarEnergia(energia);
+    }
+
+    /**
+     * Registra en la bitacora la liquidacion mensual de haberes de la tripulacion.
+     *
+     * <b>pre:</b> la nave asignada y su tripulacion no deben ser nulas. Cada tripulante debe tener un sueldo valido. <br>
+     * <b>post:</b> se agrego a la bitacora una entrada por cada tripulante con su sueldo y una entrada final con el total.
+     *       La tripulacion y la nave quedan inalteradas (solo se modifica la bitacora).
+     */
+    public void liquidarHaberesMensuales() {
+        double total = 0;
+
+        for (Tripulante t : nave.getTripulacion()) {
+            double sueldo = t.getSueldo();
+            total += sueldo;
+            this.escribeBitacora("Haber de " + t.getNombre() + ": $" + String.format("%.2f", sueldo), "LIQUIDACION");
+        }
+
+        this.escribeBitacora("Total de haberes de la tripulación: $" + String.format("%.2f", total), "LIQUIDACION");
     }
 }
