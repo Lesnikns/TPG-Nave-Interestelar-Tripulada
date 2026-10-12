@@ -11,13 +11,20 @@ public class MisionIntercepcionAsistencia extends Mision {
     public void ejecutarMision(AsistenteDeComando asistente) {
         System.out.println("Ejecutando intercepción y asistencia...");
         asistente.escribeBitacora("Ejecutando la mision de intercepcion y asistencia", "EVENTO");
-
         asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
+        System.out.println("Intercepcion y asistencia realizadas con exito.");
+        asistente.escribeBitacora("Intercepcion y asistencia realizadas con exito", "EVENTO");
+
     }
 
     @Override
     public void aplicarConsecuencias(AsistenteDeComando asistente) {
-        asistente.cargarEnergiaNave(this.energia);
-        asistente.escribeBitacora("Bonificación: +5 Energía por éxito en M-01.", "EVENTO");
+        // Evaluamos: ¿Sobrevivió con recursos suficientes? (Ej: combustible mayor a 0)
+        if (asistente.getNave().getCombustible() > 0 && asistente.getNave().getEnergia() > 0) {
+            asistente.cargarEnergiaNave(this.energia);
+            asistente.escribeBitacora("Evaluación exitosa: Misión completada con recursos estables. Bonificación: +" + this.energia + " Energía", "EVENTO");
+        } else {
+            asistente.escribeBitacora("Evaluación fallida: La nave finalizó la asistencia sin recursos suficientes para operar normalmente.", "ERROR");
+        }
     }
 }

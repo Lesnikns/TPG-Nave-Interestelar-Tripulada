@@ -1,0 +1,202 @@
+Simulación Final
+
+=== Escenario A — Ejecución correcta ===
+
+
+--- 1. Naves creadas por la fábrica (configuración inicial) ---
+Exploradora: combustible=60, energía=80, desgaste=0
+Carguero   : combustible=100, energía=60, desgaste=0
+Combate    : combustible=80, energía=100, desgaste=0
+
+--- 2. Tripulación de la nave exploradora ---
+[OK] Antes de asignar, la tripulación mínima NO se cumple
+[OK] Tras asignar (1 capitán + 4 con cargo), la tripulación mínima se cumple
+
+--- 3. Misiones ---
+Iniciando mision Rescate de sonda
+Ejecutando intercepción y asistencia...
+Misión finalizada.
+Recursos tras M-01: combustible=56, energía=85, desgaste=4
+Iniciando mision Extraer Titanio
+Ejecutando Recoleccion...
+Objeto recolectado con exito.
+Misión finalizada.
+Recursos tras M-02: combustible=52, energía=90, desgaste=8
+Iniciando mision Volver a base
+Completando retorno seguro...
+Misión finalizada.
+Recursos tras M-03: combustible=48, energía=90, desgaste=12
+
+--- 4. Verificación de recursos finales ---
+[OK] Combustible final 48 (60 - 3 x 4)
+[OK] Energía final 90 (80 + 5 + 5 + 0)
+[OK] Desgaste final 12 (3 x 4)
+
+--- 5. Bitácora (orden de inserción = orden temporal) ---
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-01: Rescate de sonda']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Ejecutando la mision de intercepcion y asistencia']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Bonificación: +5 Energía por éxito en M-01.']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Mision M-01 finalizada con exito']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Disponible']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-02: Extraer Titanio']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Ejecutando la mision de recoleccion']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Objeto recolectado con exito']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Bonificación: +5 Energía por éxito en M-02.']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Mision M-02 finalizada con exito']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Disponible']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-03: Volver a base']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Ejecutando la mision de retorno seguro']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Sin bonificación de energía para M-03.']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Mision M-03 finalizada con exito']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Disponible']
+
+
+=== Escenario B — Recursos insuficientes ===
+
+
+--- Caso 1: desgaste crítico (98) ---
+Antes  : combustible=100, energía=60, desgaste=98
+Iniciando mision Minería en Asteroide
+El asistente informa: La misión fue abortada. Causa: Nave dañada, requiere mantenimiento previo.
+Después: combustible=100, energía=60, desgaste=98
+[OK] Sin cambios parciales: combustible, energía y desgaste intactos
+[OK] El motor sigue Disponible
+Bitácora (debe registrar el motivo):
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-02: Minería en Asteroide']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'ERROR', mensaje = 'Misión abortada - Nave dañada, requiere mantenimiento previo.']
+
+
+--- Caso 2: combustible insuficiente (quedan 3 y la misión requiere 4) ---
+Antes  : combustible=3, energía=60, desgaste=0
+Iniciando mision Rescate de sonda
+El asistente informa: La misión fue abortada. Causa: Combustible insuficiente (requiere 4, tiene 3).
+Después: combustible=3, energía=60, desgaste=0
+[OK] Sin cambios parciales: combustible, energía y desgaste intactos
+[OK] El motor sigue Disponible
+Bitácora (debe registrar el motivo):
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-01: Rescate de sonda']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'ERROR', mensaje = 'Misión abortada - Combustible insuficiente (requiere 4, tiene 3).']
+
+
+=== Escenario C — Motor Warp ===
+
+
+--- 1. Secuencia válida ---
+[OK] Estado inicial: Disponible
+[OK] Tras preparar salto: ya no está disponible
+[OK] En warp: no está disponible
+[OK] Tras cerrar el ciclo: Disponible
+
+--- 2. Transiciones inválidas ---
+Pidiendo warp directo desde Disponible...
+[OK] Transición rechazada: el motor sigue Disponible
+Pidiendo preparar salto estando en Preparando salto...
+[OK] Transición rechazada: el motor sigue en Preparando salto (no Disponible)
+
+--- 3. Bitácora (cada rechazo debe figurar como Error) ---
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Disponible']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Error', mensaje = 'No permitida transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Error', mensaje = 'No permitida transicion a estado: Preparando salto ']
+
+
+=== Escenario D — Contrato inválido ===
+
+
+--- 1. Operación válida (control) ---
+[OK] Carga de 10 de energía aceptada
+[OK] Energía = inicial + 10
+
+--- 2. Cargas que exceden la capacidad (tope 100) ---
+[OK] cargarEnergia(5000) devuelve false (rechazo completo)
+[OK] Energía conservada (90)
+[OK] Energía conservada también a través del Asistente
+[OK] cargarCombustible(5000) devuelve false (rechazo completo)
+[OK] Combustible conservado (60)
+
+=== Haberes — 4 cargos x 3 orígenes (5 años de antigüedad; Consejero con 10 consejos) ===
+
+[OK] Capitán   Vulcano   esperado=2030 obtenido=2030,0
+[OK] Capitán   Marciano  esperado=2018 obtenido=2018,0
+[OK] Capitán   Terricola esperado=2020 obtenido=2020,0
+[OK] Consejero Vulcano   esperado=800 obtenido=800,0
+[OK] Consejero Marciano  esperado=788 obtenido=788,0
+[OK] Consejero Terricola esperado=790 obtenido=790,0
+[OK] Teniente  Vulcano   esperado=490 obtenido=490,0
+[OK] Teniente  Marciano  esperado=478 obtenido=478,0
+[OK] Teniente  Terricola esperado=480 obtenido=480,0
+[OK] Alférez   Vulcano   esperado=235 obtenido=235,0
+[OK] Alférez   Marciano  esperado=223 obtenido=223,0
+[OK] Alférez   Terricola esperado=225 obtenido=225,0
+
+--- Liquidación mensual de la tripulación de ejemplo (a través del Asistente) ---
+[OK] Total esperado 5100 (3020 + 1180 + 456 + 224 + 220), obtenido 5100,0
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'LIQUIDACION', mensaje = 'Haber de Kirk: $3020,00']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'LIQUIDACION', mensaje = 'Haber de Spock: $1180,00']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'LIQUIDACION', mensaje = 'Haber de Bones: $456,00']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'LIQUIDACION', mensaje = 'Haber de Uhura: $224,00']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'LIQUIDACION', mensaje = 'Haber de Marvin: $220,00']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'LIQUIDACION', mensaje = 'Total de haberes de la tripulación: $5100,00']
+
+
+=== Mantenimiento — recursos antes y después de una misión y de un mantenimiento ===
+
+Inicial: combustible=60, energía=80, desgaste=0
+Iniciando mision Volver a base
+Completando retorno seguro...
+Misión finalizada.
+Tras la misión: combustible=56, energía=80, desgaste=4
+[OK] Con desgaste 4 no requiere mantenimiento
+
+--- Desgaste en el umbral (80) ---
+Con desgaste alto: combustible=56, energía=80, desgaste=80
+[OK] Requiere mantenimiento
+[OK] La nave deja de estar operativa
+Intentando una misión con la nave sin operatividad...
+Iniciando mision Volver a base
+El asistente informa: La misión fue abortada. Causa: Nave dañada, requiere mantenimiento previo.
+Tras el intento: combustible=56, energía=80, desgaste=80
+
+--- Mantenimiento ---
+Tras el mantenimiento: combustible=56, energía=80, desgaste=0
+[OK] Desgaste = 0
+[OK] Combustible y energía sin cambios
+[OK] La nave vuelve a estar operativa
+Repitiendo la misión tras el mantenimiento...
+Iniciando mision Volver a base
+Completando retorno seguro...
+Misión finalizada.
+Tras la misión: combustible=52, energía=80, desgaste=4
+
+--- Bitácora ---
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-03: Volver a base']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Ejecutando la mision de retorno seguro']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Sin bonificación de energía para M-03.']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Mision M-03 finalizada con exito']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Disponible']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-03: Volver a base']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'ERROR', mensaje = 'Misión abortada - Nave dañada, requiere mantenimiento previo.']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Iniciando mision M-03: Volver a base']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Ejecutando la mision de retorno seguro']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Preparando salto ']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Salto warp']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Sin bonificación de energía para M-03.']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'EVENTO', mensaje = 'Mision M-03 finalizada con exito']
+Entrada [fecha = Sun Oct 11 19:59:29 GMT-03:00 2026, tipo = 'Transicion', mensaje = 'transicion a estado: Disponible']
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.253 s
+[INFO] Finished at: 2026-10-11T19:59:29-03:00
+[INFO] ------------------------------------------------------------------------
