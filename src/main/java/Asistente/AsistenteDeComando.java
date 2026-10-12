@@ -20,6 +20,9 @@ public class AsistenteDeComando {
         return bitacora;
     }
 
+    public Nave getNave() {
+        return nave;
+    }
     /**
      * Verifica si la nave tiene los recursos necesarios para soportar una operacion.
      *
@@ -144,4 +147,6 @@ public class AsistenteDeComando {
 
         this.escribeBitacora("Total de haberes de la tripulación: $" + String.format("%.2f", total), "LIQUIDACION");
     }
+
+
 }

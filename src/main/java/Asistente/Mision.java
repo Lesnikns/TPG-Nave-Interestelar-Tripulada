@@ -116,5 +116,6 @@ public abstract class Mision {
     private void finalizarMision(AsistenteDeComando asistente) {
         asistente.escribeBitacora("Mision M-0" + this.id + " finalizada con exito", "EVENTO");
         System.out.println("Misión finalizada.");
+        System.out.println(" ");
     }
 }

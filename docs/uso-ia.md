@@ -16,3 +16,7 @@ También se utilizó para comentar el código de Asistente.AsistenteDeComando.ja
 
 Se hizo uso de la IA para generar el código del sistema de prueba, donde replicamos los escenarios pedidos por la cátedra en el pdf del TPG.
 Se utilizó para detectar errores después de haber agregado paquetes para separarv las clases.
+
+11/10/26 Herramienta usada: Claude
+
+Se hizo uso de la IA para realizar los archivos README.md y Documentacion.md.

@@ -11,16 +11,16 @@ public class MisionRecoleccion extends Mision {
     public void ejecutarMision(AsistenteDeComando asistente) {
         System.out.println("Ejecutando Recoleccion...");
         asistente.escribeBitacora("Ejecutando la mision de recoleccion", "EVENTO");
-
         asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
-
         System.out.println("Objeto recolectado con exito.");
         asistente.escribeBitacora("Objeto recolectado con exito", "EVENTO");
+
     }
 
     @Override
     public void aplicarConsecuencias(AsistenteDeComando asistente) {
         asistente.cargarEnergiaNave(this.energia);
-        asistente.escribeBitacora("Bonificación: +5 Energía por éxito en M-02.", "EVENTO");
+        asistente.escribeBitacora("Evaluación exitosa: Elemento registrado en bodega. Bonificación: +" + this.energia + " Energía", "EVENTO");
+
     }
 }
