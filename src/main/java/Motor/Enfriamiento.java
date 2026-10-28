@@ -31,8 +31,11 @@ public class Enfriamiento implements EstadoMotor {
      * @param motor - motor warp sobre el cual se pidio la accion. motor != null
      */
     @Override
-    public void cerrar(MotorWarp motor) {
-        this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[0], "Error");
+    public void cerrar(MotorWarp motor) throws InterruptedException {
+        Thread.sleep(10000); // ahora si esperara 10 segundos, tiempo que tardara en cerrarse el motor!
+        motor.setEstado(new Disponible(this.nave));
+        motor.setNombreEstado(nomEstados[0]);
+        this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[0],"Transicion");
     }
 
     /**

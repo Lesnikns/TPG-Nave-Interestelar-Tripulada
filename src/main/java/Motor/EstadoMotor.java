@@ -24,7 +24,7 @@ public interface EstadoMotor {
 	 * <b>post:</b> en el caso idoneo el motor paso a Disponible (estado y nombre de estado coherentes) y se registro la transicion; en cualquier otro estado el motor y la nave no cambiaron y se registro el error de transicion
 	 * @param motor - motor warp sobre el cual se pidio la accion. motor != null
 	 */
-	void cerrar(MotorWarp motor);
+	void cerrar(MotorWarp motor) throws InterruptedException;
 	/**
 	 * Inicia la preparacion de un salto, llevando al motor de Disponible a PreparandoSalto
 	 * <b>pre:</b> motor != null; para el caso idoneo, el estado actual es Disponible <br>

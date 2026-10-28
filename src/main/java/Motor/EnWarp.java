@@ -20,9 +20,7 @@ public class EnWarp implements EstadoMotor {
 	 */
 	@Override
 	public void cerrar(MotorWarp motor) {
-		motor.setEstado(new Disponible(this.nave));
-		motor.setNombreEstado(nomEstados[0]);
-		this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[0],"Transicion");
+		this.nave.getAsistente().escribeBitacora("No permitida transicion a estado: " + nomEstados[0],"Error");
 	}
 	/**
 	 * Intenta preparar un salto. No es una accion valida en EnWarp, ya que hay un salto en curso
@@ -52,7 +50,9 @@ public class EnWarp implements EstadoMotor {
 	 */
 	@Override
 	public void enfriar(MotorWarp motor) {
-		//no se define pasaje a estado de enfriamiento hasta 2da entrega
+		motor.setEstado(new Enfriamiento(this.nave));
+		motor.setNombreEstado(nomEstados[3]);
+		this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[3],"Transicion");
 	}
 
 	/**
