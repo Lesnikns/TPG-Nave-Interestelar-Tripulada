@@ -23,6 +23,7 @@ public abstract class Nave {
     private MotorWarp motor;
     private AsistenteDeComando asistente;
     private ArrayList<Tripulante> tripulacion;
+    private int inventarioGemas;
 
     /**
      * Construye una nave con una configuración inicial de recursos.
@@ -53,6 +54,7 @@ public abstract class Nave {
         this.energia = energia;
         this.tripulacion = new ArrayList<>();
         this.motor = new MotorWarp(this);
+        this.inventarioGemas = 0;
     }
 
     //-- Sección de identidad
@@ -126,6 +128,7 @@ public abstract class Nave {
     public int getDesgaste() {
         return desgaste;
     }
+
 
     /**
      * Intenta cargar energía en la nave.
@@ -351,5 +354,18 @@ public abstract class Nave {
                 ", asistente=" + asistente +
                 ", tripulacion=" + tripulacion +
                 '}';
+    }
+
+    public int getInventarioGemas() {
+        return inventarioGemas;
+    }
+    public void agregarGemas(int cantidad) {
+        if (cantidad > 0) {
+            this.inventarioGemas += cantidad;
+        }
+    }
+    public void recargarTotalmenteRecursos() {
+        this.combustible = COMBUSTIBLE_MAX;
+        this.energia = ENERGIA_MAX;
     }
 }
