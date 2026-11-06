@@ -20,3 +20,11 @@ Se utilizó para detectar errores después de haber agregado paquetes para separ
 11/10/26 Herramienta usada: Claude
 
 Se hizo uso de la IA para realizar los archivos README.md y Documentacion.md.
+
+5/11/26 Herramienta usada: Claude
+
+Proposito de la consulta: pedido para la generacion de javadocs de la entrega 2 y de los assert de las precondiciones, documentando las funciones hechas (motor + estados con los pedidos saltar y saltarWarp, interfaz del observador y clase observada propias del patron Observer)
+
+Documentos afectados: Motor.MotorWarp.java, Motor.EstadoMotor.java, Motor.Disponible.java, Motor.PreparandoSalto.java, Motor.EnWarp.java, Motor.Enfriamiento.java, Eventos.ObservadoModelo.java, Eventos.IObservadorModelo.java
+
+Se verifico el resultado a partir de la lectura de estos javadocs para comprobar su correcta documentacion, y ejecutando con -ea para comprobar que los assert no se disparan en los casos de uso normales
