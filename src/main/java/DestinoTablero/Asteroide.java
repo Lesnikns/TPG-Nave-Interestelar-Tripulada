@@ -9,9 +9,8 @@ public class Asteroide implements ElementoDelUniverso {
 
     @Override
     public void interactuar(Nave nave, Mision mision, AsistenteDeComando asistente) {
-        nave.restarEnergia(danoEnergia); // falta
-        mision.registrarEnergiaPerdida(danoEnergia);
-        asistente.escribeBitacora("Impacto con asteroide: -" + danoEnergia + " de energía.", "ERROR");
+        nave.consumirEnergia(danoEnergia);
+        asistente.escribeBitacora("Impacto con asteroide: -" + danoEnergia + " de energía.", "EVENTO");
     }
 
 }

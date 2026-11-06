@@ -12,7 +12,7 @@ public class RiquezaEspacial implements ElementoDelUniverso{
     }
     @Override
     public void interactuar(Nave nave, Mision mision, AsistenteDeComando asistente) {
-        mision.registrarGemasRecolectadas(this.cantidadGemas);
+        asistente.agregarGemasANave(this.cantidadGemas);
         asistente.escribeBitacora("¡Gemas encontradas en el camino! +" + cantidadGemas + " gemas recolectadas.", "EVENTO");
     }
 }
