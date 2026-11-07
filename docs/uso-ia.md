@@ -28,3 +28,12 @@ Proposito de la consulta: pedido para la generacion de javadocs de la entrega 2 
 Documentos afectados: Motor.MotorWarp.java, Motor.EstadoMotor.java, Motor.Disponible.java, Motor.PreparandoSalto.java, Motor.EnWarp.java, Motor.Enfriamiento.java, Eventos.ObservadoModelo.java, Eventos.IObservadorModelo.java
 
 Se verifico el resultado a partir de la lectura de estos javadocs para comprobar su correcta documentacion, y ejecutando con -ea para comprobar que los assert no se disparan en los casos de uso normales
+
+7/11/26
+Herramienta usada: Claude
+
+Proposito de la consulta: pedido para la generacion de javadocs y de los assert de las precondiciones de las clases de la bitacora observable y del informe final de mision
+
+Documentos afectados: Asistente.Bitacora.java, Asistente.Entrada.java, Asistente.Informe.java, Asistente.HistorialDeInformes.java
+
+Se verifico el resultado a partir de la lectura de estos javadocs para comprobar su correcta documentacion, y ejecutando con -ea para comprobar que los assert no se disparan en los casos de uso normales
