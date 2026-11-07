@@ -37,3 +37,12 @@ Proposito de la consulta: pedido para la generacion de javadocs y de los assert 
 Documentos afectados: Asistente.Bitacora.java, Asistente.Entrada.java, Asistente.Informe.java, Asistente.HistorialDeInformes.java
 
 Se verifico el resultado a partir de la lectura de estos javadocs para comprobar su correcta documentacion, y ejecutando con -ea para comprobar que los assert no se disparan en los casos de uso normales
+
+7/11/26
+Herramienta usada: Claude
+
+Proposito de la consulta: pedido para la generacion de los javadocs y assert restantes (clases del UniversoParalelo Recondito: plataforma de carga, generadoras y naves consumidoras) y de las clases de interfaz con Swing: armado de los paneles con JPanel, JLabel, JButton, JTextArea, JScrollPane y JTable (con su modelo de tabla de solo lectura), su disposicion con BorderLayout y FlowLayout, los comandos de accion de los botones (setActionCommand) y su conexion con el controlador (ActionListener), y la actualizacion de los paneles desde los hilos del modelo con SwingUtilities.invokeLater
+
+Documentos afectados: UniversoParalelo.PlataformaDeCarga.java, UniversoParalelo.GeneradoraDeEnergia.java, UniversoParalelo.NaveConsumidora.java, Vista.InterfazVisor.java, Vista.PanelVisor.java, Vista.PanelBitacora.java, Vista.PanelInformes.java, Controlador.ControladorVisor.java
+
+Se verifico el resultado leyendo los javadocs, compilando, ejecutando con -ea para comprobar que los assert no se disparan en los casos de uso normales, y probando los paneles en una ventana (botones y consola del visor, bitacora e historial de informes actualizandose solos)
