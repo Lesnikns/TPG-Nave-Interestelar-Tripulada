@@ -4,16 +4,16 @@ import java.util.Date;
 
 /**
  * Representa un evento registrado en la bitacora de un asistente de comando: que paso (mensaje), de que clase fue (tipo) y cuando sucedio (fecha).
- * Una entrada es inmutable: una vez creada no puede modificarse. Los tipos usados hasta ahora son "Error" y "Transicion";
- * tambien corresponde registrar ejecucion de misiones, resultados y operaciones sobre recursos.
+ * Una entrada es inmutable: una vez creada no puede modificarse. El tipo clasifica el evento, por ejemplo "Transicion", "Evento" o "Error" en el motor warp,
+ * y los eventos de ejecucion de misiones, resultados y operaciones sobre recursos que registra el asistente.
  * <b>invariantes:</b> mensaje != null y mensaje != "" <br>
  * tipo != null y tipo != "" <br>
  * fecha != null, fijada en el instante de creacion y sin cambios posteriores
  */
 public class Entrada {
-	private String mensaje;
-	private Date fecha;
-	private String tipo;
+	private final String mensaje;
+	private final Date fecha;
+	private final String tipo;
 
 	/**
 	 * Devuelve el texto que describe lo sucedido en el evento
@@ -21,17 +21,17 @@ public class Entrada {
 	 * <b>post:</b> se devolvio una referencia al mensaje, sin modificarlo
 	 * @return el mensaje del evento
 	 */
-	protected String getMensaje() {
+	public String getMensaje() {
 		return this.mensaje;
 	}
 	/**
 	 * Devuelve el momento en que se registro el evento (permite ordenar los eventos en forma temporal)
 	 * <b>pre:</b> la entrada fue construida correctamente (fecha no-nula) <br>
-	 * <b>post:</b> se devolvio la fecha de creacion de la entrada, sin modificarla
+	 * <b>post:</b> se devolvio una copia de la fecha de creacion de la entrada (modificar la copia no cambia la entrada)
 	 * @return la fecha en que sucedio el evento
 	 */
-	protected Date getFecha() {
-		return this.fecha;
+	public Date getFecha() {
+		return new Date(fecha.getTime());
 	}
 	/**
 	 * Devuelve la clase de evento registrado (por ejemplo "Error" o "Transicion")
@@ -39,14 +39,14 @@ public class Entrada {
 	 * <b>post:</b> se devolvio una referencia al tipo, sin modificarlo
 	 * @return el tipo del evento
 	 */
-	protected String getTipo() {
+	public String getTipo() {
 		return this.tipo;
 	}
 
 	/**
 	 * override del metodo toString(), devolviendo fecha, tipo y mensaje de la entrada
 	 * <b>pre:</b> Objeto Asistente.Entrada != null; campos fecha, tipo, mensaje distintos de nulo o "" (bitacora no tendra eventos nulos o vacios) <br>
-	 * <b>post:</n> se devolvera un String con los campos principales de la entrada, para mostrar por sistema
+	 * <b>post:</b> se devolvera un String con los campos principales de la entrada, para mostrar por sistema
 	 * @return string de retorno != null, != ""
 	 */
 	@Override
@@ -62,6 +62,8 @@ public class Entrada {
 	 */
 	public Entrada(String mensaje, String tipo) {
 		super();
+		assert mensaje != null && !mensaje.isEmpty() : "el mensaje de la entrada no puede ser nulo ni vacio";
+		assert tipo != null && !tipo.isEmpty() : "el tipo de la entrada no puede ser nulo ni vacio";
 		this.mensaje = mensaje;
 		this.tipo = tipo;
 		this.fecha = new Date();
