@@ -1,12 +1,12 @@
 package Asistente;
 
 import DestinoTablero.Posicion;
+import Naves.Nave;
 
 public class MisionRetornoSeguro extends Mision {
 
-    public MisionRetornoSeguro(int id, String descripcion, Posicion destino) {
-        super(id, descripcion, destino);
-        this.energia = 0;
+    public MisionRetornoSeguro(int id, String descripcion, Posicion destino, int desgaste, int combustible) {
+        super(id, descripcion, destino, desgaste, combustible, 0 );
     }
 
     @Override
@@ -26,8 +26,9 @@ public class MisionRetornoSeguro extends Mision {
 
     @Override
     protected void aplicarCierreDefinitivo(AsistenteDeComando asistente) {
-        asistente.getNave().realizarMantenimiento();
-        asistente.cargarEnergiaNave(100);
+        Nave nave = asistente.getNave();
+        nave.realizarMantenimiento();
+        nave.recargarTotalmenteRecursos();
         asistente.escribeBitacora("Cierre M-03: Mantenimiento completo realizado. Nave reparada y recursos recargados al 100%.", "EVENTO");
     }
 }

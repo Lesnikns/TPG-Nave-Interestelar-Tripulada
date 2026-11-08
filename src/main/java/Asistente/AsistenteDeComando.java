@@ -36,7 +36,7 @@ public class AsistenteDeComando {
         }
     }
 
-    public void verificarRecursos(int combReq, int desgasteReq)
+    public void verificarRecursos(int combReq, int desgasteReq, int energiaReq)
             throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException {
         if (!nave.enEstadoOperativo()) {
             throw new NaveNoOperativaException("Nave dañada, requiere mantenimiento previo.");
@@ -47,27 +47,21 @@ public class AsistenteDeComando {
         if (nave.getDesgaste() + desgasteReq > 100) {
             throw new DesgasteCriticoException("Riesgo crítico: La misión superará el 100% de desgaste permitido.");
         }
-    }
-
-    public void verificarMotorDisponible() throws MotorNoDisponibleException {
-        if (!nave.getMotor().disponibleParaSaltar()) {
-            throw new MotorNoDisponibleException("Motor no disponible para salto warp.");
+        if (nave.getEnergia() < energiaReq){
+            throw new EnergiaInsuficienteException("Energia insuficiente (requiere " + energiaReq + ", tiene " + nave.getEnergia() + ").");
         }
     }
 
-    public void ejecutarSaltoYCostos(int combustible, int desgaste) {
-        nave.getMotor().pedirPrepararSalto();
+    public void cobrarCostoInicial(int combustible, int energia, int desgaste) {
         nave.consumirCombustible(combustible);
+        nave.consumirEnergia(energia);
         nave.aumentarDesgaste(desgaste);
-        nave.getMotor().pedirWarp();
     }
 
     public void coordinarMision(Mision m) {
         try {
             m.iniciarMision(this);
-            nave.getMotor().pedirDisponibilidad();
-        } catch (NaveNoOperativaException | CombustibleInsuficienteException |
-                 DesgasteCriticoException | MotorNoDisponibleException e) {
+        } catch (NaveNoOperativaException | CombustibleInsuficienteException | DesgasteCriticoException e) {
             System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
             this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
         } catch (Exception e) {
@@ -107,15 +101,20 @@ public class AsistenteDeComando {
     }
 
     public void moverNaveA(Posicion nuevaPosicion) {
-        tablero.moverNave(nuevaPosicion);
-        this.escribeBitacora("Nave desplazada a: (" + nuevaPosicion.getX() + ", " + nuevaPosicion.getY() + ")", "EVENTO");
+        if (this.tablero != null && nuevaPosicion != null) {
+            this.tablero.moverNave(nuevaPosicion);
+            this.escribeBitacora("Nave desplazada a: (" + nuevaPosicion.getX() + ", " + nuevaPosicion.getY() + ")", "EVENTO");
+        }
     }
 
     public void interactuarConElementoEn(Posicion pos, Mision misionActual) {
-        ElementoDelUniverso elemento = tablero.inspeccionarPosicion();
-        if (elemento != null) {
-            this.escribeBitacora("Elemento detectado en casilla. Iniciando interacción...", "EVENTO");
-            elemento.interactuar(this.nave, misionActual, this);
+        if (this.tablero != null) {
+            ElementoDelUniverso elemento = this.tablero.inspeccionarPosicion();
+
+            if (elemento != null) {
+                this.escribeBitacora("Elemento detectado en casilla (" + pos.getX() + ", " + pos.getY() + "). Interactuando...", "EVENTO");
+                elemento.interactuar(this.nave, misionActual, this);
+            }
         }
     }
 
@@ -127,5 +126,51 @@ public class AsistenteDeComando {
         if (destino != null) {
             destino.turnoDestino();
         }
+    }
+
+    public void agregarGemasANave(int cantidad) {
+        if (this.nave != null) {
+            this.nave.agregarGemas(cantidad); // Invocación directa a la nave
+            this.escribeBitacora("Inventario actualizado: +" + cantidad + " gemas en bodega.", "EVENTO");
+        }
+    }
+
+    public boolean hayObstaculoEn(Posicion pos) {
+        if (this.tablero != null && pos != null) {
+            ElementoDelUniverso[][] mapa = this.tablero.verTablero();
+            int px = pos.getX();
+            int py = pos.getY();
+
+            if (px >= 0 && px < this.tablero.getX() && py >= 0 && py < this.tablero.getY()) {
+                return mapa[px][py] != null;
+            }
+        }
+        return false;
+    }
+
+    public Posicion buscarVecinoLibre(Posicion posActual) {
+        if (this.tablero == null || posActual == null) {
+            return null;
+        }
+
+        ElementoDelUniverso[][] mapa = this.tablero.verTablero();
+        int filas = this.tablero.getX();
+        int columnas = this.tablero.getY();
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx != 0 || dy != 0) {
+                    int nx = posActual.getX() + dx;
+                    int ny = posActual.getY() + dy;
+
+                    if (nx >= 0 && nx < filas && ny >= 0 && ny < columnas) {
+                        if (mapa[nx][ny] == null) {
+                            return new Posicion(nx, ny);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
