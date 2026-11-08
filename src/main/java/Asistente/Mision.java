@@ -1,6 +1,8 @@
 package Asistente;
 
 import DestinoTablero.Posicion;
+
+import java.util.Iterator;
 import java.util.List;
 import Excepciones.*;
 
@@ -14,21 +16,16 @@ public abstract class Mision {
 
     protected boolean exito;
     protected List<Posicion> rutaCalculada;
-    protected int energiaPerdida;
-    protected int energiaGanada;
-    protected int gemasRecolectadas;
 
-    public Mision(int id, String descripcion, Posicion destino) {
+
+    public Mision(int id, String descripcion, Posicion destino, int desgaste, int combustible, int energia) {
         this.id = id;
         this.descripcion = descripcion;
         this.destino = destino;
-        this.desgaste = 4;
-        this.combustible = 4;
-        this.energia = 0;
+        this.desgaste = desgaste;
+        this.combustible = combustible;
+        this.energia = energia;
         this.exito = false;
-        this.energiaPerdida = 0;
-        this.energiaGanada = 0;
-        this.gemasRecolectadas = 0;
     }
 
     public int getId() { return id; }
@@ -54,13 +51,13 @@ public abstract class Mision {
         }
     }
 
-    public void prepararMision(AsistenteDeComando asistente)
+    protected void prepararMision(AsistenteDeComando asistente)
             throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
         System.out.println("Iniciando preparación de M-0" + this.id + ": " + this.descripcion);
         asistente.escribeBitacora("Iniciando preparación de M-0" + this.id + ": " + this.descripcion, "EVENTO");
 
-        asistente.verificarRecursos(this.combustible, this.desgaste);
-        asistente.verificarMotorDisponible();
+        // Valida recursos iniciales de la nave sin consultar al motor
+        asistente.verificarRecursos(this.combustible, this.energia, this.desgaste);
 
         if (this.destino == null) {
             this.destino = asistente.obtenerObjetivoTablero();
@@ -69,33 +66,66 @@ public abstract class Mision {
         this.rutaCalculada = asistente.obtenerRutaLargoAlcance(this.destino);
     }
 
-    public void ejecutarMision(AsistenteDeComando asistente) {
-        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
-        asistente.escribeBitacora("Despegue ejecutado. Costo: " + this.combustible + " combustible, " + this.desgaste + " desgaste.", "EVENTO");
+    protected void ejecutarMision(AsistenteDeComando asistente) {
+        asistente.cobrarCostoInicial(this.combustible, this.energia, this.desgaste);
+        asistente.escribeBitacora("Despegue ejecutado. Costos iniciales aplicados: "
+                + this.combustible + " comb, " + this.energia + " energía, " + this.desgaste + " desgaste.", "EVENTO");
 
         if (this.rutaCalculada != null) {
-            for (Posicion coordActual : this.rutaCalculada) {
-                if (!asistente.getNave().enEstadoOperativo()) {
-                    break;
+            Iterator<Posicion> iteradorRuta = this.rutaCalculada.iterator();
+            int turnosTrabadoWarp = 0;
+
+            while (iteradorRuta.hasNext() && asistente.getNave().enEstadoOperativo()) {
+                Posicion siguientePos = iteradorRuta.next();
+                boolean hayObstaculoEnRuta = asistente.hayObstaculoEn(siguientePos);
+                int pasosAvanzados = 0;
+
+                // Regla de los 10 turnos: Si supera 10 turnos de bloqueo, fuerza salto normal hacia la colisión
+                if (turnosTrabadoWarp >= 10) {
+                    pasosAvanzados = asistente.getNave().getMotor().saltar();
+                } else if (hayObstaculoEnRuta) {
+                    Posicion vecinoLibre = asistente.buscarVecinoLibre(siguientePos);
+
+                    if (!asistente.hayObstaculoEn(siguientePos)) {
+                        // El camino se liberó: el motor cancela la preparación automáticamente al pedir saltar()
+                        pasosAvanzados = asistente.getNave().getMotor().saltar();
+                    } else if (vecinoLibre != null) {
+                        // Hay un vecino libre: se desvía y ejecuta salto normal
+                        asistente.moverNaveA(vecinoLibre);
+                        pasosAvanzados = asistente.getNave().getMotor().saltar();
+                    } else {
+                        // El obstáculo persiste: solicita salto Warp al motor (devuelve 0, 1 o 2)
+                        pasosAvanzados = asistente.getNave().getMotor().saltarWarp();
+                    }
+                } else {
+                    // Camino despejado: avance normal
+                    pasosAvanzados = asistente.getNave().getMotor().saltar();
                 }
 
-                asistente.moverNaveA(coordActual);
-                asistente.interactuarConElementoEn(coordActual, this);
+                // Control del contador de bloqueo en Warp
+                if (pasosAvanzados == 0) {
+                    turnosTrabadoWarp++;
+                } else {
+                    turnosTrabadoWarp = 0;
 
-                if (!asistente.getNave().enEstadoOperativo()) {
-                    asistente.escribeBitacora("Misión fallida: La nave quedó destruida o inoperativa en ("
-                            + coordActual.getX() + "," + coordActual.getY() + ")", "ERROR");
+                    // Si el motor avanzó 1 o 2 posiciones, impacta la nueva ubicación y la interacción
+                    asistente.moverNaveA(siguientePos);
+                    asistente.interactuarConElementoEn(siguientePos, this);
+                }
+
+                // Fase final del turno: escaneo, movimiento de tablero y breve retardo
+                if (asistente.getNave().enEstadoOperativo()) {
+                    asistente.escanearCortoAlcance();
+                    asistente.moverElementosTablero();
+
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    asistente.escribeBitacora("Misión fallida: La nave quedó inoperativa durante el trayecto.", "ERROR");
                     this.exito = false;
-                    return;
-                }
-
-                asistente.escanearCortoAlcance();
-                asistente.moverElementosTablero();
-
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -105,20 +135,29 @@ public abstract class Mision {
         }
     }
 
-    public void evaluarMision(AsistenteDeComando asistente) {
+    protected void evaluarMision(AsistenteDeComando asistente) {
         String resultado = this.exito ? "ÉXITO" : "FRACASO";
-        String balance = String.format(
-                "Informe Final M-0%d (%s) [%s]\n- Combustible consumido: %d\n- Desgaste base: %d\n- Energía ganada: %d\n- Energía perdida: %d\n- Gemas recolectadas: %d",
-                this.id, this.descripcion, resultado, this.combustible, this.desgaste, this.energiaGanada, this.energiaPerdida, this.gemasRecolectadas
-        );
-        asistente.escribeBitacora(balance, this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
-        System.out.println(balance);
+
+        StringBuilder balance = new StringBuilder();
+        balance.append(String.format("Informe Final M-0%d (%s) [%s]\n", this.id, this.descripcion, resultado));
+        balance.append(String.format("- Combustible consumido: %d\n", this.combustible));
+        balance.append(String.format("- Desgaste base: %d", this.desgaste));
+
+        String detallesExtra = obtenerDetalles(); // hook para lo de gemas y energia
+        if (detallesExtra != null && !detallesExtra.isEmpty()) {
+            balance.append("\n").append(detallesExtra);
+        }
+
+        String informeFinal = balance.toString();
+        asistente.escribeBitacora(informeFinal, this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
+        System.out.println(informeFinal);
     }
 
-    public void finalizarMision(AsistenteDeComando asistente) {
+    protected void finalizarMision(AsistenteDeComando asistente) {
         if (this.exito) {
             aplicarCierreDefinitivo(asistente);
-            asistente.escribeBitacora("Cierre M-0" + this.id + ": Recursos aplicados definitivamente a la nave.", "EVENTO");
+            String mensajeDetalle = obtenerMensajeCierre();
+            asistente.escribeBitacora("Cierre M-0" + this.id + ": " + mensajeDetalle, "EVENTO");
         } else {
             asistente.escribeBitacora("Cierre M-0" + this.id + ": Misión fallida, no se aplican beneficios.", "EVENTO");
         }
@@ -127,8 +166,11 @@ public abstract class Mision {
 
     protected abstract boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente);
     protected abstract void aplicarCierreDefinitivo(AsistenteDeComando asistente);
+    protected  String obtenerDetalles(){
+        return "";
+    }
+    protected String obtenerMensajeCierre(){
+        return "";
+    }
 
-    public void registrarEnergiaPerdida(int cantidad) { this.energiaPerdida += cantidad; }
-    public void registrarEnergiaGanada(int cantidad) { this.energiaGanada += cantidad; }
-    public void registrarGemasRecolectadas(int cantidad) { this.gemasRecolectadas += cantidad; }
 }
