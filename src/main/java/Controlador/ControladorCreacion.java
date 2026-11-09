@@ -1,5 +1,10 @@
 package Controlador;
 
+import Asistente.AsistenteDeComando;
+import DestinoTablero.CantidadDeElementosSuperaCasillaException;
+import DestinoTablero.DimensionesDeTableroInconsistentesException;
+import DestinoTablero.FabricaDeTableros;
+import DestinoTablero.Tablero;
 import Excepciones.TipoDeNaveInvalidoException;
 import Naves.FabricaDeNaves;
 import Naves.Nave;
@@ -20,6 +25,7 @@ import java.awt.event.ActionListener;
 public class ControladorCreacion implements ActionListener {
     private VistaCreacion vista;
     private SesionDeNave sesion;
+    private final FabricaDeTableros fabricaTableros = new FabricaDeTableros(10,10);
     private FabricaDeNaves fabrica = new FabricaDeNaves();
 
     public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion) {
@@ -41,17 +47,21 @@ public class ControladorCreacion implements ActionListener {
     		}
         }
     }
-
     private void crearNave() {
         if (!sesion.hayNave() || vista.confirmar("Ya hay una nave activa. Si creas otra se pierde la actual y su tripulación. ¿Continuar?")) {
 	        try {
-	            Nave nave = fabrica.getNave(vista.getTipoNave().toLowerCase());
+                Nave nave = fabrica.getNave(vista.getTipoNave().toLowerCase());
+                //creo AdC y luego se lo asigno... necesito el tablero también; TODO: Tablero, fabricas,... (revisar, está así nomás o no llego)
+                Tablero tablero = fabricaTableros.crear();
+                AsistenteDeComando asistente = new AsistenteDeComando(nave, tablero);
+                nave.setAsistente(asistente);
 	            sesion.setNave(nave);
 	            actualizarVista();
-	        } 
-	        catch (TipoDeNaveInvalidoException e) {
-	            vista.mostrarError(e.getMessage());
 	        }
+            catch (TipoDeNaveInvalidoException | DimensionesDeTableroInconsistentesException
+                   | CantidadDeElementosSuperaCasillaException e) {
+                vista.mostrarError(e.getMessage());
+            }
         }
     }
 

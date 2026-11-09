@@ -17,7 +17,7 @@ public class VentanaPrincipal extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(900, 600);
         setLocationRelativeTo(null);
- 
+
         contenedor.add(vistaLogin, "LOGIN");
         contenedor.add(vistaRegistro, "REGISTRO");
         contenedor.add(pestanas, "PRINCIPAL");

@@ -1,6 +1,7 @@
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import Controlador.ControladorControl;
 import Controlador.ControladorCreacion;
 import Controlador.ControladorLogin;
 import Controlador.ControladorRegistro;
@@ -12,13 +13,8 @@ import Persistencia.BaseDeDatos;
 import Persistencia.DAOInterfaz;
 import Persistencia.DAOJDBC;
 import Persistencia.Negocio;
-import Vista.TripulantesTableModel;
-import Vista.VentanaPrincipal;
-import Vista.VistaCreacion;
-import Vista.VistaLogin;
-import Vista.VistaRegistro;
-import Vista.VistaTripulantes;
- 
+import Vista.*;
+
 public class TestSistema{
  
     public static void main(String[] args) {
@@ -39,19 +35,24 @@ public class TestSistema{
  
     private static void iniciar(Negocio servicio) {
         SesionDeNave sesion = new SesionDeNave();
- 
+
+
         // Vistas
+        VistaControl vistaControl = new VistaControl();
         VistaLogin vistaLogin = new VistaLogin();
         VistaRegistro vistaRegistro = new VistaRegistro();
         VistaCreacion vistaCreacion = new VistaCreacion();
         VistaTripulantes vistaTripulantes = new VistaTripulantes(new TripulantesTableModel(sesion));
         VentanaPrincipal ventana = new VentanaPrincipal(vistaLogin, vistaRegistro);
- 
+
+
         ventana.agregarPanel("Creación", vistaCreacion, false);
         ventana.agregarPanel("Tripulantes", vistaTripulantes, true);
+        ventana.agregarPanel("Control", vistaControl, true);
+
         // Agregar mas paneles con ventana.agregarPanel(Titulo, vista, y un booleano que indica si el panel requiere
         // el uso de la nave o no)
- 
+        new ControladorControl(vistaControl, sesion);
         new ControladorLogin(vistaLogin, ventana, servicio);
         new ControladorRegistro(vistaRegistro, ventana, servicio);
         new ControladorCreacion(vistaCreacion, sesion);

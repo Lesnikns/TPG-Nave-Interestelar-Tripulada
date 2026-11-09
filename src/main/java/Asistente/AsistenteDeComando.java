@@ -1,9 +1,7 @@
 package Asistente;
 
-import DestinoTablero.Destino;
-import DestinoTablero.ElementoDelUniverso;
-import DestinoTablero.Posicion;
-import DestinoTablero.Tablero;
+import DestinoTablero.*;
+import Eventos.ObservadoModelo;
 import Excepciones.*;
 import Naves.Nave;
 import Tripulacion.Tripulante;
@@ -11,7 +9,7 @@ import Tripulacion.Tripulante;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AsistenteDeComando {
+public class AsistenteDeComando extends ObservadoModelo<EstadoTurno>{
     private final Nave nave;
     private final Bitacora bitacora;
     private Tablero tablero;
@@ -69,6 +67,7 @@ public class AsistenteDeComando {
             System.out.println("Error crítico inesperado en el sistema: " + e.getMessage());
             this.escribeBitacora("Error crítico inesperado: " + e.getMessage(), "ERROR");
         }
+        publicarTurno();            //
     }
 
     public void moverNaveA(Posicion nuevaPosicion) {
@@ -130,5 +129,12 @@ public class AsistenteDeComando {
         if (nave.getEnergia() < energiaReq){
             //throw new EnergiaInsuficienteException("Energia insuficiente (requiere " + energiaReq + ", tiene " + nave.getEnergia() + ").");
         }
+    }
+    /** Saca ambas fotos en el hilo de la misión y avisa. Reemplaza a publicarRecursos(). */
+    public void publicarTurno() {
+        if (tablero == null) return;
+        EstadoRecursos r = new EstadoRecursos(nave.getCombustible(), nave.getEnergia(), nave.getDesgaste());
+        EstadoTablero t = new EstadoTablero(tablero);
+        notificar(new EstadoTurno(t, r));
     }
 }
