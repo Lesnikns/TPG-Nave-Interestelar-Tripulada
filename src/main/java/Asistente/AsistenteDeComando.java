@@ -36,46 +36,6 @@ public class AsistenteDeComando {
         }
     }
 
-    public void verificarRecursos(int combReq, int desgasteReq)
-            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException {
-        if (!nave.enEstadoOperativo()) {
-            throw new NaveNoOperativaException("Nave dañada, requiere mantenimiento previo.");
-        }
-        if (nave.getCombustible() < combReq) {
-            throw new CombustibleInsuficienteException("Combustible insuficiente (requiere " + combReq + ", tiene " + nave.getCombustible() + ").");
-        }
-        if (nave.getDesgaste() + desgasteReq > 100) {
-            throw new DesgasteCriticoException("Riesgo crítico: La misión superará el 100% de desgaste permitido.");
-        }
-    }
-
-    public void verificarMotorDisponible() throws MotorNoDisponibleException {
-        if (!nave.getMotor().disponibleParaSaltar()) {
-            throw new MotorNoDisponibleException("Motor no disponible para salto warp.");
-        }
-    }
-
-    public void ejecutarSaltoYCostos(int combustible, int desgaste) {
-        nave.getMotor().pedirPrepararSalto();
-        nave.consumirCombustible(combustible);
-        nave.aumentarDesgaste(desgaste);
-        nave.getMotor().pedirWarp();
-    }
-
-    public void coordinarMision(Mision m) {
-        try {
-            m.iniciarMision(this);
-            nave.getMotor().pedirDisponibilidad();
-        } catch (NaveNoOperativaException | CombustibleInsuficienteException |
-                 DesgasteCriticoException | MotorNoDisponibleException e) {
-            System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
-            this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
-        } catch (Exception e) {
-            System.out.println("Error crítico inesperado en el sistema: " + e.getMessage());
-            this.escribeBitacora("Error crítico inesperado: " + e.getMessage(), "ERROR");
-        }
-    }
-
     public void escribeBitacora(String mensaje, String tipo) {
         Entrada e = new Entrada(mensaje, tipo);
         bitacora.cargaEntrada(e);
@@ -99,11 +59,16 @@ public class AsistenteDeComando {
         return tablero.obtenerObjetivo();
     }
 
-    public List<Posicion> obtenerRutaLargoAlcance(Posicion destinoPos) {
-        this.escribeBitacora("Calculando ruta hacia (" + destinoPos.getX() + ", " + destinoPos.getY() + ")", "EVENTO");
-        List<Posicion> ruta = new ArrayList<>();
-        ruta.add(destinoPos);
-        return ruta;
+    public void coordinarMision(Mision m) {
+        try {
+            m.iniciarMision(this);
+        } catch (NaveNoOperativaException | CombustibleInsuficienteException | DesgasteCriticoException e) {
+            System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
+            this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
+        } catch (Exception e) {
+            System.out.println("Error crítico inesperado en el sistema: " + e.getMessage());
+            this.escribeBitacora("Error crítico inesperado: " + e.getMessage(), "ERROR");
+        }
     }
 
     public void moverNaveA(Posicion nuevaPosicion) {
@@ -126,6 +91,44 @@ public class AsistenteDeComando {
     public void moverElementosTablero() {
         if (destino != null) {
             destino.turnoDestino();
+        }
+    }
+
+    public Posicion getPosicionNave() {
+        return tablero.getPosicionNave();
+    }
+
+    public List<Posicion> obtenerRutaLargoAlcance(Posicion origen, Posicion destino) {
+        escribeBitacora("Calculando ruta de (" + origen.getX() + "," + origen.getY() + ") a (" + destino.getX() + "," + destino.getY() + ")", "EVENTO");
+        return nave.getRadarLA().calcularRuta(tablero, origen, destino);
+    }
+
+    public boolean hayObstaculoAdelante(Posicion siguiente) {
+        return nave.getRadarCA().hayObstaculoAdelante(tablero, siguiente);
+    }
+
+    //estos 2 hacer que se usen después, con varios otros posibles; cosa de que mision necesite conocer a nave o motor
+    public int saltarNormal() { return nave.getMotor().saltar(); }
+    public int saltarWarp()   { return nave.getMotor().saltarWarp(); }
+
+    public void cobrarCostoInicial(int combustible, int energia, int desgaste) {
+        nave.consumirCombustible(combustible);
+        nave.consumirEnergia(energia);
+        nave.aumentarDesgaste(desgaste);
+    }
+    public void verificarRecursos(int combReq, int energiaReq, int desgasteReq)
+            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException {
+        if (!nave.enEstadoOperativo()) {
+            throw new NaveNoOperativaException("Nave dañada, requiere mantenimiento previo.");
+        }
+        if (nave.getCombustible() < combReq) {
+            throw new CombustibleInsuficienteException("Combustible insuficiente (requiere " + combReq + ", tiene " + nave.getCombustible() + ").");
+        }
+        if (nave.getDesgaste() + desgasteReq > 100) {
+            throw new DesgasteCriticoException("Riesgo crítico: La misión superará el 100% de desgaste permitido.");
+        }
+        if (nave.getEnergia() < energiaReq){
+            //throw new EnergiaInsuficienteException("Energia insuficiente (requiere " + energiaReq + ", tiene " + nave.getEnergia() + ").");
         }
     }
 }

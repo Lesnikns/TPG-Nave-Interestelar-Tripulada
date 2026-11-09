@@ -30,8 +30,8 @@ public class Informe {
     private final int balanceCombustible;
     private final int balanceEnergia;
     private final int balanceDesgaste;
-    private final int gemasGanadas;
-    private final int transferido;
+    //private final int gemasGanadas;
+    //private final int transferido;
 
     /**
      * Devuelve el numero de la mision informada
@@ -111,18 +111,18 @@ public class Informe {
      * <b>post:</b> se devolvio la cantidad de gemas, mayor o igual a cero
      * @return gemas ganadas
      */
-    public int getGemasGanadas() {
-        return gemasGanadas;
-    }
+    //public int getGemasGanadas() {
+     //   return gemasGanadas;
+    //}
     /**
      * Devuelve los recursos entregados a la nave aliada (solo la mision de intercepcion y asistencia transfiere recursos)
      * <b>pre:</b> ninguna <br>
      * <b>post:</b> se devolvio la cantidad transferida, mayor o igual a cero
      * @return recursos transferidos
      */
-    public int getTransferido() {
-        return transferido;
-    }
+    //public int getTransferido() {
+     //   return transferido;
+    //}
 
     /**
      * Genera el texto del informe, para mostrarlo en el historial de informes
@@ -138,7 +138,7 @@ public class Informe {
         texto += " | combustible " + String.format("%+d", balanceCombustible)
                 + ", energia " + String.format("%+d", balanceEnergia)
                 + ", desgaste " + String.format("%+d", balanceDesgaste)
-                + " | gemas " + gemasGanadas + ", transferido " + transferido
+               // + " | gemas " + gemasGanadas + ", transferido " + transferido
                 + " | " + fecha + "\n";
         return texto;
     }
@@ -163,7 +163,7 @@ public class Informe {
         assert causa != null : "la causa no puede ser nula (vacia si la mision fue exitosa)";
         assert EXITOSA.equals(resultado) || !causa.isEmpty() : "una mision fallida o abortada debe informar su causa";
         assert combustibleInicial >= 0 && energiaInicial >= 0 && desgasteInicial >= 0 : "los valores iniciales no pueden ser negativos";
-        assert mision.getGemasGanadas() >= 0 && mision.getTransferido() >= 0 : "las gemas y lo transferido no pueden ser negativos";
+        //assert mision.getGemasGanadas() >= 0 && mision.getTransferido() >= 0 : "las gemas y lo transferido no pueden ser negativos";
         this.id = mision.getId();
         this.descripcion = mision.getDescripcion();
         this.fecha = new Date();
@@ -172,7 +172,7 @@ public class Informe {
         this.balanceCombustible = nave.getCombustible() - combustibleInicial;
         this.balanceEnergia = nave.getEnergia() - energiaInicial;
         this.balanceDesgaste = nave.getDesgaste() - desgasteInicial;
-        this.gemasGanadas = mision.getGemasGanadas();
-        this.transferido = mision.getTransferido();
+        //this.gemasGanadas = mision.getGemasGanadas();
+        //this.transferido = mision.getTransferido();
     }
 }

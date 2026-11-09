@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class Nave {
+public abstract class Nave  implements Combatiente {
     private static final int COMBUSTIBLE_MAX = 100;
     private static final int ENERGIA_MAX = 100;
     private static final int DESGASTE_MAX = 100;
@@ -23,7 +23,12 @@ public abstract class Nave {
     private MotorWarp motor;
     private AsistenteDeComando asistente;
     private ArrayList<Tripulante> tripulacion;
+
+    //2da parte
+    private boolean destruidaEnCombate;
     private int inventarioGemas;
+    private RadarLargoAlcance radarLA;
+    private RadarCortoAlcance radarCA;
 
     /**
      * Construye una nave con una configuración inicial de recursos.
@@ -55,6 +60,8 @@ public abstract class Nave {
         this.tripulacion = new ArrayList<>();
         this.motor = new MotorWarp(this);
         this.inventarioGemas = 0;
+        this.radarLA = new RadarLargoAlcance();
+        this.radarCA = new RadarCortoAlcance();
     }
 
     //-- Sección de identidad
@@ -268,7 +275,7 @@ public abstract class Nave {
      * !requiereMantenimiento().
      */
     public boolean enEstadoOperativo() {
-        return !requiereMantenimiento();
+        return !requiereMantenimiento() && !estaDestruida(); //puede que igual quede obsoleta
     }
 
     //- Sección de tripulación
@@ -356,6 +363,59 @@ public abstract class Nave {
                 '}';
     }
 
+    //2da parte TODO: Hacer el javadoc teniendo en cuenta la corrección.
+    /* La nave debe destruirse si: el desgaste alcanza el valor de 100, la energía queda en 0 o el combustible queda en 0 */
+    //cambio: ahora guarda solo la destrucción por combate.
+    public void destruir(){
+        this.destruidaEnCombate=true;
+    }
+
+    public boolean estaDestruida(){ //no hay riesgo de que quede desactualizado.
+        return destruidaEnCombate || desgaste >= DESGASTE_MAX || energia <= 0 || combustible <= 0;
+    }
+
+    /*
+    public void verificarRecursos(){ //decide si la nave se destruye por recursos insuficientes; debe usarse cada vez que se toquen recursos
+        if(desgaste==DESGASTE_MAX || energia==0 || combustible==0)
+            this.destruir();
+    }
+    Mejor, siguiendo con lo pensado para el estado operativo o para saber si requiere mantenimiento, no lo agrego como atributo,
+    para lo que necesito recordar actualizar en cada modificación de recursos, sino que hago que la función determine si esta o no destruida.
+    Sí debo guardar en un atributo la destrucción por combate, que forma parte de la condición.
+     */
+
+    // En la entrega e1 pedían claramente rechazar las operaciones inválidas,
+    // ahora muchas cosas no se podrían hacer si se rechaza...
+    // creo métodos nuevos (tendré que buscar luego en qué
+    // casos se deben usar unos u otros, o si alguno queda obsoleto,
+    // saltará con las pruebas)
+    // ahora, por ejemplo, no parece tener sentido hacerlas booleanas...
+    // TODO: no enviar sin verificar.
+    public void recibirDanoEnergia(int cantidad) {
+        if (cantidad <= 0) return;
+        this.energia = Math.max(0, this.energia - cantidad);
+    }
+
+    public void recibirDanoCombustible(int cantidad) {
+        if (cantidad <= 0) return;
+        this.combustible = Math.max(0, this.combustible - cantidad);
+    }
+
+    public void recargarEnergiaConTope(int cantidad) {
+        if (cantidad <= 0) return;
+        this.energia = Math.min(ENERGIA_MAX, this.energia + cantidad);
+    }
+
+    public void recargarCombustibleConTope(int cantidad) {
+        if (cantidad <= 0) return;
+        this.combustible = Math.min(COMBUSTIBLE_MAX, this.combustible + cantidad);
+    }
+
+    public void aumentarDesgasteConTope(int cantidad) {
+        if (cantidad <= 0) return;
+        this.desgaste = Math.min(DESGASTE_MAX, this.desgaste + cantidad);
+    }
+
     public int getInventarioGemas() {
         return inventarioGemas;
     }
@@ -367,5 +427,13 @@ public abstract class Nave {
     public void recargarTotalmenteRecursos() {
         this.combustible = COMBUSTIBLE_MAX;
         this.energia = ENERGIA_MAX;
+    }
+
+    public RadarCortoAlcance getRadarCA() {
+        return radarCA;
+    }
+
+    public RadarLargoAlcance getRadarLA() {
+        return radarLA;
     }
 }

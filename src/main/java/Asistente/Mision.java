@@ -54,53 +54,77 @@ public abstract class Mision {
         }
     }
 
-    public void prepararMision(AsistenteDeComando asistente)
-            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
+    protected static final int MAX_TURNOS_SIN_AVANZAR = 10;
+
+    protected void prepararMision(AsistenteDeComando asistente) throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
         System.out.println("Iniciando preparación de M-0" + this.id + ": " + this.descripcion);
         asistente.escribeBitacora("Iniciando preparación de M-0" + this.id + ": " + this.descripcion, "EVENTO");
 
-        asistente.verificarRecursos(this.combustible, this.desgaste);
-        asistente.verificarMotorDisponible();
+        // Valida recursos iniciales de la nave sin consultar al motor
+        asistente.verificarRecursos(this.combustible, this.energia, this.desgaste);
 
         if (this.destino == null) {
             this.destino = asistente.obtenerObjetivoTablero();
         }
 
-        this.rutaCalculada = asistente.obtenerRutaLargoAlcance(this.destino);
+        this.rutaCalculada = asistente.obtenerRutaLargoAlcance(asistente.getPosicionNave(), destino);
     }
 
-    public void ejecutarMision(AsistenteDeComando asistente) {
-        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
-        asistente.escribeBitacora("Despegue ejecutado. Costo: " + this.combustible + " combustible, " + this.desgaste + " desgaste.", "EVENTO");
+    protected void ejecutarMision(AsistenteDeComando asistente) {
+        asistente.cobrarCostoInicial(combustible, energia, desgaste);
+        asistente.escribeBitacora("Despegue ejecutado. Costos iniciales: " + combustible + " comb, "+ energia + " energía, " + desgaste + " desgaste.", "EVENTO");
 
-        if (this.rutaCalculada != null) {
-            for (Posicion coordActual : this.rutaCalculada) {
-                if (!asistente.getNave().enEstadoOperativo()) {
-                    break;
-                }
+        //lo cambio
+        int i = 0;                  // próxima posición de la ruta a alcanzar
+        int turnosSinAvanzar = 0;
 
-                asistente.moverNaveA(coordActual);
-                asistente.interactuarConElementoEn(coordActual, this);
+        while (i < rutaCalculada.size() && !asistente.getNave().estaDestruida()) {
+            Posicion siguiente = rutaCalculada.get(i);
+            boolean hayLugarParaWarp = i + 1 < rutaCalculada.size(); // al menos 2
+            int avanzados;
 
-                if (!asistente.getNave().enEstadoOperativo()) {
-                    asistente.escribeBitacora("Misión fallida: La nave quedó destruida o inoperativa en ("
-                            + coordActual.getX() + "," + coordActual.getY() + ")", "ERROR");
+            if (turnosSinAvanzar >= MAX_TURNOS_SIN_AVANZAR) {
+                // salida del atasco: se acepta el choque
+                avanzados = asistente.getNave().getMotor().saltar();
+                if (avanzados == 0) {
+                    asistente.escribeBitacora("Misión fallida: La nave no pudo avanzar", "ERROR");
                     this.exito = false;
                     return;
                 }
+            } else if (hayLugarParaWarp && asistente.hayObstaculoAdelante(siguiente)) {
+                avanzados = asistente.getNave().getMotor().saltarWarp();
+            } else {
+                avanzados = asistente.getNave().getMotor().saltar();
+            }
 
-                asistente.escanearCortoAlcance();
+            if (avanzados > 0) {
+                i += avanzados;
+                Posicion llegada = rutaCalculada.get(i - 1);
+                asistente.moverNaveA(llegada);
+                asistente.interactuarConElementoEn(llegada, this);
+                turnosSinAvanzar = 0;
+            } else {
+                turnosSinAvanzar++;
+            }
+
+            // Fase final del turno: movimiento de tablero y breve retardo
+            if (!asistente.getNave().estaDestruida()) {
                 asistente.moverElementosTablero();
 
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    return;
                 }
+            } else {
+                asistente.escribeBitacora("Misión fallida: La nave quedó destruida durante el trayecto.", "ERROR");
+                this.exito = false;
+                return;
             }
         }
 
-        if (asistente.getNave().enEstadoOperativo()) {
+        if (!asistente.getNave().estaDestruida()) {
             this.exito = verificarYEjecutarAccionDestino(asistente);
         }
     }
