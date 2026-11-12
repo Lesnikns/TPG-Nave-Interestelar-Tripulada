@@ -1,6 +1,7 @@
 package Controlador;
 
 import Asistente.AsistenteDeComando;
+import Asistente.PublicadorDeTurnos;
 import DestinoTablero.CantidadDeElementosSuperaCasillaException;
 import DestinoTablero.DimensionesDeTableroInconsistentesException;
 import DestinoTablero.FabricaDeTableros;
@@ -27,10 +28,12 @@ public class ControladorCreacion implements ActionListener {
     private SesionDeNave sesion;
     private final FabricaDeTableros fabricaTableros = new FabricaDeTableros(10,10);
     private FabricaDeNaves fabrica = new FabricaDeNaves();
+    private PublicadorDeTurnos publicador;
 
-    public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion) {
+    public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion, PublicadorDeTurnos publicador) {
         this.vista = vista;
         this.sesion = sesion;
+        this.publicador = publicador;
         vista.setControlador(this);
     }
 
@@ -48,14 +51,19 @@ public class ControladorCreacion implements ActionListener {
         }
     }
     private void crearNave() {
+        if (sesion.hayMisionEnCurso()) {
+            vista.mostrarError("No se puede crear una nave mientras hay una misión en curso.");
+            return;
+        }
         if (!sesion.hayNave() || vista.confirmar("Ya hay una nave activa. Si creas otra se pierde la actual y su tripulación. ¿Continuar?")) {
 	        try {
                 Nave nave = fabrica.getNave(vista.getTipoNave().toLowerCase());
                 //creo AdC y luego se lo asigno... necesito el tablero también; TODO: Tablero, fabricas,... (revisar, está así nomás o no llego)
                 Tablero tablero = fabricaTableros.crear();
-                AsistenteDeComando asistente = new AsistenteDeComando(nave, tablero);
+                AsistenteDeComando asistente = new AsistenteDeComando(nave, tablero, publicador);
                 nave.setAsistente(asistente);
 	            sesion.setNave(nave);
+                asistente.publicarTurno();
 	            actualizarVista();
 	        }
             catch (TipoDeNaveInvalidoException | DimensionesDeTableroInconsistentesException

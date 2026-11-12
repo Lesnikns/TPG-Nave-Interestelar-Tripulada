@@ -8,6 +8,10 @@ import java.util.List;
 // Guarda la única nave activa.
 public class SesionDeNave extends ObservadoModelo<String> {
     private Nave nave;
+    private boolean misionEnCurso;   // se lee y escribe solo desde el hilo de Swing
+
+    public boolean hayMisionEnCurso() { return misionEnCurso; }
+    public void setMisionEnCurso(boolean enCurso) { this.misionEnCurso = enCurso; }
 
     public boolean hayNave() {
         return nave != null;

@@ -71,9 +71,7 @@ public abstract class Mision {
     }
 
     protected void ejecutarMision(AsistenteDeComando asistente) {
-        asistente.cobrarCostoInicial(combustible, energia, desgaste);
-        asistente.publicarTurno();            // 1. tras el despegue
-        asistente.escribeBitacora("Despegue ejecutado. Costos iniciales: " + combustible + " comb, "+ energia + " energía, " + desgaste + " desgaste.", "EVENTO");
+        asistente.despegar(combustible, energia, desgaste);
 
         //lo cambio
         int i = 0;                  // próxima posición de la ruta a alcanzar
@@ -111,20 +109,16 @@ public abstract class Mision {
 
             // Fase final del turno: movimiento de tablero y breve retardo
             if (!asistente.getNave().estaDestruida()) {
-                asistente.moverElementosTablero();
-                asistente.publicarTurno();            // 2. una vez por turno
-
+                asistente.cerrarTurno();
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    asistente.publicarTurno();            // 3. estado final cada vez que falla
                     return;
                 }
             } else {
                 asistente.escribeBitacora("Misión fallida: La nave quedó destruida durante el trayecto.", "ERROR");
                 this.exito = false;
-                asistente.publicarTurno();          // 3. estado final cada vez que falla
                 return;
             }
         }

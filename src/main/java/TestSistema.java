@@ -1,10 +1,16 @@
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import Asistente.EstadoRecursos;
+import Asistente.EstadoTurno;
+import Asistente.PublicadorDeTurnos;
 import Controlador.ControladorControl;
 import Controlador.ControladorCreacion;
 import Controlador.ControladorLogin;
 import Controlador.ControladorRegistro;
+import DestinoTablero.EstadoTablero;
+import DestinoTablero.FabricaDeTableros;
+import DestinoTablero.Tablero;
 import Eventos.IObservadorModelo;
 import Eventos.ObservadoModelo;
 import Excepciones.PersistenciaException;
@@ -38,6 +44,7 @@ public class TestSistema{
 
 
         // Vistas
+        PublicadorDeTurnos publicador = new PublicadorDeTurnos();
         VistaControl vistaControl = new VistaControl();
         VistaLogin vistaLogin = new VistaLogin();
         VistaRegistro vistaRegistro = new VistaRegistro();
@@ -46,17 +53,18 @@ public class TestSistema{
         VentanaPrincipal ventana = new VentanaPrincipal(vistaLogin, vistaRegistro);
 
 
+
         ventana.agregarPanel("Creación", vistaCreacion, false);
         ventana.agregarPanel("Tripulantes", vistaTripulantes, true);
         ventana.agregarPanel("Control", vistaControl, true);
 
         // Agregar mas paneles con ventana.agregarPanel(Titulo, vista, y un booleano que indica si el panel requiere
         // el uso de la nave o no)
-        new ControladorControl(vistaControl, sesion);
+        new ControladorControl(vistaControl, sesion, publicador);
         new ControladorLogin(vistaLogin, ventana, servicio);
         new ControladorRegistro(vistaRegistro, ventana, servicio);
-        new ControladorCreacion(vistaCreacion, sesion);
- 
+        new ControladorCreacion(vistaCreacion, sesion, publicador);
+
         // Las pestañas que necesitan nave se habilitan cuando la sesión tiene una
         sesion.agregarObservador(new IObservadorModelo<String>() {
             @Override

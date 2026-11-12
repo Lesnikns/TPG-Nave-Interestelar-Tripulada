@@ -1,7 +1,6 @@
 package Asistente;
 
 import DestinoTablero.*;
-import Eventos.ObservadoModelo;
 import Excepciones.*;
 import Naves.Nave;
 import Tripulacion.Tripulante;
@@ -9,14 +8,16 @@ import Tripulacion.Tripulante;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AsistenteDeComando extends ObservadoModelo<EstadoTurno>{
+public class AsistenteDeComando{
     private final Nave nave;
     private final Bitacora bitacora;
     private Tablero tablero;
     private Destino destino;
+    private final PublicadorDeTurnos turnos;
 
-    public AsistenteDeComando(Nave nave, Tablero tablero) {
+    public AsistenteDeComando(Nave nave, Tablero tablero, PublicadorDeTurnos turnos) {
         this.nave = nave;
+        this.turnos = turnos;
         this.bitacora = new Bitacora();
         this.tablero = tablero;
         if (tablero != null) {
@@ -66,8 +67,9 @@ public class AsistenteDeComando extends ObservadoModelo<EstadoTurno>{
         } catch (Exception e) {
             System.out.println("Error crítico inesperado en el sistema: " + e.getMessage());
             this.escribeBitacora("Error crítico inesperado: " + e.getMessage(), "ERROR");
+        }finally {
+            publicarTurno();                   // cubre éxito, fallo, destrucción y abortos
         }
-        publicarTurno();            //
     }
 
     public void moverNaveA(Posicion nuevaPosicion) {
@@ -135,6 +137,17 @@ public class AsistenteDeComando extends ObservadoModelo<EstadoTurno>{
         if (tablero == null) return;
         EstadoRecursos r = new EstadoRecursos(nave.getCombustible(), nave.getEnergia(), nave.getDesgaste());
         EstadoTablero t = new EstadoTablero(tablero);
-        notificar(new EstadoTurno(t, r));
+        turnos.publicar(new EstadoTurno(t, r));
+    }
+
+    public void despegar(int combustible, int energia, int desgaste) {
+        cobrarCostoInicial(combustible, energia, desgaste);
+        escribeBitacora("Despegue ejecutado. Costos iniciales: " + combustible + " comb, " + energia + " energía, " + desgaste + " desgaste.", "EVENTO");
+        publicarTurno();                       // bitácora y después publicar
+    }
+
+    public void cerrarTurno() {
+        moverElementosTablero();
+        publicarTurno();
     }
 }
