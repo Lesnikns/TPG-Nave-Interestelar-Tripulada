@@ -60,7 +60,8 @@ public class TestSistema{
 
         // Agregar mas paneles con ventana.agregarPanel(Titulo, vista, y un booleano que indica si el panel requiere
         // el uso de la nave o no)
-        new ControladorControl(vistaControl, sesion, publicador);
+        publicador.agregarObservador(vistaControl);
+        new ControladorControl(vistaControl, sesion);
         new ControladorLogin(vistaLogin, ventana, servicio);
         new ControladorRegistro(vistaRegistro, ventana, servicio);
         new ControladorCreacion(vistaCreacion, sesion, publicador);

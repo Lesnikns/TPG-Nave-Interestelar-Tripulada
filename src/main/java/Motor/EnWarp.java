@@ -1,5 +1,6 @@
 package Motor;
 
+import Excepciones.CombustibleInsuficienteException;
 import Naves.Nave;
 
 import static Motor.MotorWarp.CASILLEROS_SALTO_WARP;
@@ -90,7 +91,7 @@ public class EnWarp implements EstadoMotor {
 	 * @return casilleros que avanzo la nave (0 o 1)
 	 */
 	@Override
-	public int pedirSaltoNormal(MotorWarp motor) {
+	public int pedirSaltoNormal(MotorWarp motor) throws CombustibleInsuficienteException {
 		assert nave.getAsistente() != null : "la nave no tiene asistente asignado";
 		motor.setEstado(new PreparandoSalto(nave, 1));
 		motor.setNombreEstado(nomEstados[1]);

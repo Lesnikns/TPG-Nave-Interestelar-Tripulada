@@ -1,5 +1,6 @@
 package Motor;
 
+import Excepciones.CombustibleInsuficienteException;
 import Naves.Nave;
 
 import static Motor.MotorWarp.ENERGIA_SALTO_WARP;
@@ -88,7 +89,7 @@ public class PreparandoSalto implements EstadoMotor {
 	 * @return casilleros que avanzo la nave (0 o 1)
 	 */
 	@Override
-	public int pedirSaltoNormal(MotorWarp motor) {
+	public int pedirSaltoNormal(MotorWarp motor) throws CombustibleInsuficienteException {
 		assert nave.getAsistente() != null : "la nave no tiene asistente asignado";
 		this.nave.getAsistente().escribeBitacora("Maniobra warp cancelada: se hace un salto normal","Evento");
 		motor.setEstado(new Disponible(nave));

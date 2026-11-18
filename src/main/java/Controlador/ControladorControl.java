@@ -7,18 +7,18 @@ import Asistente.*;
 import Naves.SesionDeNave;
 import Vista.VistaControl;
 
+import javax.swing.*;
+
 public class ControladorControl implements ActionListener {
     private final VistaControl vista;
     private final SesionDeNave sesion;
 
-    public ControladorControl(VistaControl vista, SesionDeNave sesion, PublicadorDeTurnos publicador) {
+    public ControladorControl(VistaControl vista, SesionDeNave sesion) {
         this.vista = vista;
         this.sesion = sesion;
         vista.setControlador(this);
-        publicador.agregarObservador(new ObservadorTurnos(vista));
     }
 
-    // ---- Botón "Iniciar misión" ----
     @Override
     public void actionPerformed(ActionEvent e) {
         if (!VistaControl.INICIAR_MISION.equals(e.getActionCommand())) return;
@@ -26,16 +26,32 @@ public class ControladorControl implements ActionListener {
             vista.mostrarError("Primero creá una nave.");
             return;
         }
-        AsistenteDeComando asistente = sesion.getNave().getAsistente();
+        if (!sesion.getNave().enEstadoOperativo()) {
+            vista.mostrarError("La nave no está operativa (destruida o requiere mantenimiento).");
+            return;
+        }
+        if(!sesion.getNave().verificaTripulacionMinima()){
+            vista.mostrarError("La nave no cuenta con la tripulación mínima");
+            return;
+        }
         Mision m = crearMision(vista.getMisionSeleccionada());
         if (m == null) {
             vista.mostrarError("Esa misión todavía no está disponible.");
             return;
         }
+        AsistenteDeComando asistente = sesion.getNave().getAsistente();
 
         sesion.setMisionEnCurso(true);
         vista.setMisionEnCurso(true);
-        new Thread(new EjecutorMision(asistente, m, vista, sesion)).start();
+        new Thread(() -> {
+            try { asistente.coordinarMision(m); }
+            finally { SwingUtilities.invokeLater(this::terminarMision); } //TODO...
+        }).start();
+    }
+
+    private void terminarMision() {
+        sesion.setMisionEnCurso(false);
+        vista.setMisionEnCurso(false);
     }
 
     private Mision crearMision(int numero) {

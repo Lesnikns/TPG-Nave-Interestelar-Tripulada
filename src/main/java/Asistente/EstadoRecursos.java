@@ -9,6 +9,8 @@ public class EstadoRecursos {
     private final int combustible;
     private final int energia;
     private final int desgaste;
+    private final int gemas;
+    private final boolean destruida;
 
     /**
      * Devuelve el combustible de la nave en el instante de la foto
@@ -38,6 +40,15 @@ public class EstadoRecursos {
         return desgaste;
     }
 
+    public int getGemas() {
+        return gemas;
+    }
+
+    public boolean getDestruida() {
+        return destruida;
+    }
+
+
     @Override
     public String toString() {
         return "Recursos [combustible = " + combustible + ", energia = " + energia + ", desgaste = " + desgaste + "]\n";
@@ -51,11 +62,13 @@ public class EstadoRecursos {
      * @param energia - energia de la nave. energia &gt;= 0
      * @param desgaste - desgaste de la nave. 0 &lt;= desgaste &lt;= 100
      */
-    public EstadoRecursos(int combustible, int energia, int desgaste) {
+    public EstadoRecursos(int combustible, int energia, int desgaste, int gemas, boolean destruida) {
         assert combustible >= 0 && energia >= 0 : "los recursos no pueden ser negativos"; //TODO: revisarlos pos cerrar lo de los métodos en Nave
         assert desgaste >= 0 && desgaste <= 100 : "el desgaste debe estar entre 0 y 100";
         this.combustible = combustible;
         this.energia = energia;
         this.desgaste = desgaste;
+        this.gemas = gemas;
+        this.destruida = destruida;
     }
 }

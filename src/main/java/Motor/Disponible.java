@@ -1,5 +1,6 @@
 package Motor;
 
+import Excepciones.CombustibleInsuficienteException;
 import Naves.Nave;
 
 import static Motor.MotorWarp.CASILLEROS_SALTO_NORMAL;
@@ -71,22 +72,30 @@ public class Disponible implements EstadoMotor {
 		return motor.saltarWarp(); //se continua proceso a saltar warp, ahora en preparacion
 	}
 
-	/**
-	 * Hace un salto normal: la nave consume combustible y avanza un casillero. Si no le alcanza el combustible, no avanza
-	 * <b>pre:</b> motor != null y el estado actual del motor es Disponible <br>
-	 * <b>post:</b> si alcanzaba el combustible, se descontaron COMBUSTIBLE_SALTO_NORMAL unidades y se devolvio 1; si no, la nave no cambio y se devolvio 0. En los dos casos se registro en la bitacora
-	 * @param motor - motor warp que recibio el pedido. motor != null
-	 * @return casilleros que avanzo la nave (0 o 1)
-	 */
 	@Override
-	public int pedirSaltoNormal(MotorWarp motor) {
-		assert nave.getAsistente() != null : "la nave no tiene asistente asignado";
+	public int pedirSaltoNormal(MotorWarp motor) throws CombustibleInsuficienteException {
+
 		if (nave.consumirCombustible(COMBUSTIBLE_SALTO_NORMAL)) {
-			this.nave.getAsistente().escribeBitacora("Salto normal: -" + COMBUSTIBLE_SALTO_NORMAL + " de combustible (quedan " + nave.getCombustible() + "), avanza " + CASILLEROS_SALTO_NORMAL + " casilleros","Evento");
+
+			this.nave.getAsistente().escribeBitacora(
+					"Salto normal: -" + COMBUSTIBLE_SALTO_NORMAL +
+							" de combustible (quedan " + nave.getCombustible() +
+							"), avanza " + CASILLEROS_SALTO_NORMAL +
+							" casilleros",
+					"EVENTO"
+			);
+
 			return CASILLEROS_SALTO_NORMAL;
 		}
-		this.nave.getAsistente().escribeBitacora("Salto normal rechazado: combustible insuficiente (requiere " + COMBUSTIBLE_SALTO_NORMAL + ", tiene " + nave.getCombustible() + ")","Error");
-		return 0;
+
+		this.nave.getAsistente().escribeBitacora(
+				"Salto normal rechazado: combustible insuficiente " +
+						"(requiere " + COMBUSTIBLE_SALTO_NORMAL +
+						", tiene " + nave.getCombustible() + ")",
+				"ERROR"
+		);
+
+		throw new CombustibleInsuficienteException("No hay combustible suficiente para realizar un salto normal.");
 	}
 
 	/**

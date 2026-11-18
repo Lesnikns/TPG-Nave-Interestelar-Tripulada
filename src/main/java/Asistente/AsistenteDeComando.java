@@ -61,7 +61,7 @@ public class AsistenteDeComando{
     public void coordinarMision(Mision m) {
         try {
             m.iniciarMision(this);
-        } catch (NaveNoOperativaException | CombustibleInsuficienteException | DesgasteCriticoException e) {
+        } catch (NaveNoOperativaException | CombustibleInsuficienteException | EnergiaInsuficienteException |  DesgasteCriticoException e) {
             System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
             this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
         } catch (Exception e) {
@@ -109,33 +109,82 @@ public class AsistenteDeComando{
     }
 
     //estos 2 hacer que se usen después, con varios otros posibles; cosa de que mision necesite conocer a nave o motor
-    public int saltarNormal() { return nave.getMotor().saltar(); }
+    public int saltarNormal() throws CombustibleInsuficienteException { return nave.getMotor().saltar(); }
     public int saltarWarp()   { return nave.getMotor().saltarWarp(); }
+    public int getCombustible() { return nave.getCombustible(); }
+    public int getEnergia() { return nave.getEnergia(); }
+    public int getDesgaste() { return nave.getDesgaste(); }
+
 
     public void cobrarCostoInicial(int combustible, int energia, int desgaste) {
-        nave.consumirCombustible(combustible);
-        nave.consumirEnergia(energia);
-        nave.aumentarDesgaste(desgaste);
+
+        boolean aplicado = nave.aplicarCostosIniciales(
+                combustible,
+                energia,
+                desgaste
+        );
+
+        if (!aplicado) {
+            throw new IllegalStateException(
+                    "No se pudieron aplicar completamente los costos iniciales de la misión."
+            );
+        }
+
+        escribeBitacora(
+                "Costos iniciales aplicados: " +
+                        combustible + " combustible, " +
+                        energia + " energía, " +
+                        desgaste + " desgaste.",
+                "EVENTO"
+        );
     }
     public void verificarRecursos(int combReq, int energiaReq, int desgasteReq)
-            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException {
+            throws NaveNoOperativaException,
+            CombustibleInsuficienteException,
+            EnergiaInsuficienteException,
+            DesgasteCriticoException {
+
+        // Los costos no pueden ser negativos.
+        if (combReq < 0 || energiaReq < 0 || desgasteReq < 0) {
+            throw new IllegalArgumentException(
+                    "Los costos de una misión no pueden ser negativos."
+            );
+        }
+
+        // Verificar que la nave pueda iniciar una misión.
         if (!nave.enEstadoOperativo()) {
-            throw new NaveNoOperativaException("Nave dañada, requiere mantenimiento previo.");
+            throw new NaveNoOperativaException(
+                    "Nave no operativa. Requiere mantenimiento previo."
+            );
         }
+
+        // Comprobar que puede pagar el combustible inicial.
         if (nave.getCombustible() < combReq) {
-            throw new CombustibleInsuficienteException("Combustible insuficiente (requiere " + combReq + ", tiene " + nave.getCombustible() + ").");
+            throw new CombustibleInsuficienteException(
+                    "Combustible insuficiente. Requiere " + combReq +
+                            " y tiene " + nave.getCombustible() + "."
+            );
         }
+
+        // Comprobar que puede pagar la energía inicial.
+        if (nave.getEnergia() < energiaReq) {
+            throw new EnergiaInsuficienteException(
+                    "Energía insuficiente. Requiere " + energiaReq +
+                            " y tiene " + nave.getEnergia() + "."
+            );
+        }
+
+        // Comprobar que el costo de desgaste no supere el máximo.
         if (nave.getDesgaste() + desgasteReq > 100) {
-            throw new DesgasteCriticoException("Riesgo crítico: La misión superará el 100% de desgaste permitido.");
-        }
-        if (nave.getEnergia() < energiaReq){
-            //throw new EnergiaInsuficienteException("Energia insuficiente (requiere " + energiaReq + ", tiene " + nave.getEnergia() + ").");
+            throw new DesgasteCriticoException(
+                    "El costo de desgaste supera el máximo permitido."
+            );
         }
     }
     /** Saca ambas fotos en el hilo de la misión y avisa. Reemplaza a publicarRecursos(). */
     public void publicarTurno() {
         if (tablero == null) return;
-        EstadoRecursos r = new EstadoRecursos(nave.getCombustible(), nave.getEnergia(), nave.getDesgaste());
+        EstadoRecursos r = new EstadoRecursos(nave.getCombustible(), nave.getEnergia(), nave.getDesgaste(), nave.getInventarioGemas(), nave.estaDestruida());
         EstadoTablero t = new EstadoTablero(tablero);
         turnos.publicar(new EstadoTurno(t, r));
     }

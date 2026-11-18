@@ -6,23 +6,29 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
+import javax.swing.*;
 
 import Asistente.EstadoRecursos;
+import Asistente.EstadoTurno;
 import DestinoTablero.EstadoTablero;
+import Eventos.IObservadorModelo;
+import Eventos.ObservadoModelo;
 
-public class VistaControl extends JPanel {
+public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurno> {
+    @Override
+    public void actualizar(ObservadoModelo<EstadoTurno> origen, EstadoTurno turno) {
+        SwingUtilities.invokeLater(() -> {      // corre en el hilo de la misión: solo encola
+            mostrarTablero(turno.getTablero());
+            mostrarRecursos(turno.getRecursos());
+        });
+    }
     public static final String INICIAR_MISION = "INICIAR_MISION";
 
     private JProgressBar barraCombustible = new JProgressBar(0, 100);
     private JProgressBar barraEnergia = new JProgressBar(0, 100);
     private JProgressBar barraDesgaste = new JProgressBar(0, 100);
+    private JLabel etiquetaGemas = new JLabel("");
+    private JLabel etiquetaDestruida = new JLabel("");
 
     private JComboBox<String> comboMision = new JComboBox<>(new String[] {
             "M-01 Intercepción y asistencia", "M-02 Recolección", "M-03 Retorno a punto seguro"});
@@ -47,6 +53,10 @@ public class VistaControl extends JPanel {
         panelRecursos.add(barraEnergia);
         panelRecursos.add(new JLabel("Desgaste:"));
         panelRecursos.add(barraDesgaste);
+        panelRecursos.add(new JLabel("Gemas"));
+        panelRecursos.add(etiquetaGemas);
+        panelRecursos.add(new JLabel("Destruida:"));
+        panelRecursos.add(etiquetaDestruida);
 
         JPanel panelMision = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         panelMision.setBorder(BorderFactory.createTitledBorder("Misión"));
@@ -91,6 +101,14 @@ public class VistaControl extends JPanel {
         barraCombustible.setValue(r.getCombustible());
         barraEnergia.setValue(r.getEnergia());
         barraDesgaste.setValue(r.getDesgaste());
+        etiquetaGemas.setText(String.valueOf(r.getGemas()));
+        if (r.getDestruida()) {
+            etiquetaDestruida.setText("Destruida");
+            etiquetaDestruida.setForeground(Color.RED);
+        } else {
+            etiquetaDestruida.setText("No destruida");
+            etiquetaDestruida.setForeground(Color.GREEN);
+        }
     }
 
     public void mostrarTablero(EstadoTablero t) {

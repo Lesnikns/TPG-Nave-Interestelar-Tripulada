@@ -1,5 +1,6 @@
 package Motor;
 
+import Excepciones.CombustibleInsuficienteException;
 import Naves.Nave;
 
 /**
@@ -63,7 +64,7 @@ public class MotorWarp{
 	 * <b>post:</b> se devolvio cuantos casilleros avanzo la nave (0 o 1) y se registro lo ocurrido en la bitacora
 	 * @return casilleros que avanzo la nave en este turno (0 o 1)
 	 */
-	public int saltar(){
+	public int saltar() throws CombustibleInsuficienteException {
 		return estado.pedirSaltoNormal(this);
 	}
 

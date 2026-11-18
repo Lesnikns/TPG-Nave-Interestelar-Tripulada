@@ -26,21 +26,32 @@ public class Enfriamiento implements EstadoMotor {
         this.nave = nave;
     }
 
-    /**
-     * Termina el enfriamiento (transicion valida desde Enfriamiento): suma el desgaste del enfriamiento y vuelve a Disponible
-     * <b>pre:</b> motor != null y el estado actual del motor es Enfriamiento <br>
-     * <b>post:</b> se sumaron DESGASTE_ENFRIAMIENTO puntos de desgaste (si la nave los admite), el motor paso a Disponible y se registro en la bitacora
-     * @param motor - motor warp que cambiara de estado. motor != null
-     */
     @Override
     public void cerrar(MotorWarp motor) {
-        if (nave.aumentarDesgaste(DESGASTE_ENFRIAMIENTO))
-            this.nave.getAsistente().escribeBitacora("Enfriamiento: +" + DESGASTE_ENFRIAMIENTO + " de desgaste (total " + nave.getDesgaste() + ")","Evento");
-        else
-            this.nave.getAsistente().escribeBitacora("Enfriamiento: el desgaste de " + DESGASTE_ENFRIAMIENTO + " supera el maximo (tiene " + nave.getDesgaste() + ")","Error");
+
+        int desgasteAnterior = nave.getDesgaste();
+
+        // El enfriamiento es una consecuencia de la simulación.
+        // Se aplica hasta alcanzar el límite de desgaste.
+        nave.aumentarDesgasteConTope(DESGASTE_ENFRIAMIENTO);
+
+        int desgasteAplicado = nave.getDesgaste() - desgasteAnterior;
+
+        this.nave.getAsistente().escribeBitacora(
+                "Enfriamiento: +" + desgasteAplicado +
+                        " de desgaste (solicitado: " + DESGASTE_ENFRIAMIENTO +
+                        ", total: " + nave.getDesgaste() + ")",
+                "EVENTO"
+        );
+
+        // Finalizar la maniobra y volver a Disponible.
         motor.setEstado(new Disponible(this.nave));
         motor.setNombreEstado(nomEstados[0]);
-        this.nave.getAsistente().escribeBitacora("transicion a estado: " + nomEstados[0],"Transicion");
+
+        this.nave.getAsistente().escribeBitacora(
+                "Transición a estado: " + nomEstados[0],
+                "TRANSICION"
+        );
     }
 
     /**

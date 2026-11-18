@@ -1,5 +1,7 @@
 package Motor;
 
+import Excepciones.CombustibleInsuficienteException;
+
 /**
  * Contrato del patron State para el motor warp: define lo que el motor delega en su estado actual.
  * Tiene dos tipos de metodos:
@@ -22,7 +24,7 @@ package Motor;
  * <b>invariantes:</b> el nombre de estado del motor coincide siempre con el estado concreto que tiene asignado <br>
  * en todo momento el motor tiene exactamente uno de los cuatro estados
  */
-public interface EstadoMotor {
+public interface EstadoMotor  {
 	String[] nomEstados = {"Disponible","Preparando salto","Salto warp","Enfriamiento"};
 	/**
 	 * Termina el enfriamiento, llevando al motor de Enfriamiento a Disponible
@@ -67,5 +69,5 @@ public interface EstadoMotor {
 	 * @param motor - motor warp que recibio el pedido. motor != null
 	 * @return casilleros que avanzo la nave en este turno (0 o 1)
 	 */
-	int pedirSaltoNormal(MotorWarp motor);
+	int pedirSaltoNormal(MotorWarp motor)throws CombustibleInsuficienteException;
 }

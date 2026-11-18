@@ -11,6 +11,10 @@ public abstract class Mision {
     protected int energia;
     protected int combustible;
     protected int desgaste;
+    protected int combustibleInicial;
+    protected int energiaInicial;
+    protected int desgasteInicial;
+    protected int combustibleGanado;   // para poder separar lo cargado de lo consumido
 
     protected boolean exito;
     protected List<Posicion> rutaCalculada;
@@ -45,7 +49,7 @@ public abstract class Mision {
     public void setDesgaste(int desgaste) { this.desgaste = desgaste; }
 
     public final void iniciarMision(AsistenteDeComando asistente)
-            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
+            throws NaveNoOperativaException, CombustibleInsuficienteException, EnergiaInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
         prepararMision(asistente);
         if (asistente.getNave().enEstadoOperativo()) {
             ejecutarMision(asistente);
@@ -56,7 +60,7 @@ public abstract class Mision {
 
     protected static final int MAX_TURNOS_SIN_AVANZAR = 10;
 
-    protected void prepararMision(AsistenteDeComando asistente) throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
+    protected void prepararMision(AsistenteDeComando asistente) throws NaveNoOperativaException, CombustibleInsuficienteException, EnergiaInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
         System.out.println("Iniciando preparación de M-0" + this.id + ": " + this.descripcion);
         asistente.escribeBitacora("Iniciando preparación de M-0" + this.id + ": " + this.descripcion, "EVENTO");
 
@@ -71,6 +75,10 @@ public abstract class Mision {
     }
 
     protected void ejecutarMision(AsistenteDeComando asistente) {
+        combustibleInicial = asistente.getCombustible();
+        energiaInicial     = asistente.getEnergia();
+        desgasteInicial    = asistente.getDesgaste();
+
         asistente.despegar(combustible, energia, desgaste);
 
         //lo cambio
@@ -82,25 +90,42 @@ public abstract class Mision {
             boolean hayLugarParaWarp = i + 1 < rutaCalculada.size(); // al menos 2
             int avanzados;
 
-            if (turnosSinAvanzar >= MAX_TURNOS_SIN_AVANZAR) {
-                // salida del atasco: se acepta el choque
-                avanzados = asistente.getNave().getMotor().saltar();
-                if (avanzados == 0) {
-                    asistente.escribeBitacora("Misión fallida: La nave no pudo avanzar", "ERROR");
-                    this.exito = false;
-                    asistente.publicarTurno();            // 3. estado final cada vez que falla
-                    return;
+            try {
+                if (turnosSinAvanzar >= MAX_TURNOS_SIN_AVANZAR) {
+                    // Intentar salir del atasco mediante un salto normal.
+                    avanzados = asistente.saltarNormal();
+                } else if (hayLugarParaWarp && asistente.hayObstaculoAdelante(siguiente)) {
+                    avanzados = asistente.saltarWarp();
+                } else {
+                    avanzados = asistente.saltarNormal();
                 }
-            } else if (hayLugarParaWarp && asistente.hayObstaculoAdelante(siguiente)) {
-                avanzados = asistente.getNave().getMotor().saltarWarp();
-            } else {
-                avanzados = asistente.getNave().getMotor().saltar();
+            } catch (CombustibleInsuficienteException e) {
+                this.exito = false;
+                asistente.escribeBitacora(
+                        "Misión fallida: no se pudo realizar el movimiento. " +
+                                e.getMessage(),
+                        "ERROR"
+                );
+                return;
             }
 
             if (avanzados > 0) {
+
                 i += avanzados;
+
                 Posicion llegada = rutaCalculada.get(i - 1);
+
                 asistente.moverNaveA(llegada);
+
+                // Comprobar si el costo del movimiento destruyó la nave.
+                if (asistente.getNave().estaDestruida()) {
+                    this.exito = false;
+                    asistente.escribeBitacora(
+                            "Misión fallida: la nave fue destruida durante el movimiento.",
+                            "ERROR"
+                    );
+                    return;
+                }
                 asistente.interactuarConElementoEn(llegada, this);
                 turnosSinAvanzar = 0;
             } else {
@@ -129,11 +154,16 @@ public abstract class Mision {
     }
 
     public void evaluarMision(AsistenteDeComando asistente) {
+        int combustibleConsumido = combustibleInicial + combustibleGanado - asistente.getCombustible();
+        int energiaConsumida     = energiaInicial + energiaGanada - energiaPerdida - asistente.getEnergia();
+        int desgasteAcumulado    = asistente.getDesgaste() - desgasteInicial;
+
+
         String resultado = this.exito ? "ÉXITO" : "FRACASO";
         String balance = String.format(
-                "Informe Final M-0%d (%s) [%s]\n- Combustible consumido: %d\n- Desgaste base: %d\n- Energía ganada: %d\n- Energía perdida: %d\n- Gemas recolectadas: %d",
-                this.id, this.descripcion, resultado, this.combustible, this.desgaste, this.energiaGanada, this.energiaPerdida, this.gemasRecolectadas
-        );
+                "Informe Final M-0%d (%s) [%s]\n- Combustible consumido: %d\n- Energía consumida: %d\n- Desgaste acumulado: %d\n- Energía ganada: %d\n- Energía perdida (impactos): %d\n- Gemas recolectadas: %d",
+                id, descripcion, resultado, combustibleConsumido, energiaConsumida,
+                desgasteAcumulado, energiaGanada, energiaPerdida, gemasRecolectadas);
         asistente.escribeBitacora(balance, this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
         System.out.println(balance);
     }
@@ -152,6 +182,7 @@ public abstract class Mision {
     protected abstract void aplicarCierreDefinitivo(AsistenteDeComando asistente);
 
     public void registrarEnergiaPerdida(int cantidad) { this.energiaPerdida += cantidad; }
+    public void registrarCombustibleGanado(int cantidad) { this.combustibleGanado += cantidad; }
     public void registrarEnergiaGanada(int cantidad) { this.energiaGanada += cantidad; }
     public void registrarGemasRecolectadas(int cantidad) { this.gemasRecolectadas += cantidad; }
 }

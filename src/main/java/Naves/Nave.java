@@ -275,7 +275,7 @@ public abstract class Nave  implements Combatiente {
      * !requiereMantenimiento().
      */
     public boolean enEstadoOperativo() {
-        return !requiereMantenimiento() && !estaDestruida(); //puede que igual quede obsoleta
+        return !requiereMantenimiento() && !estaDestruida(); //puede que igual quede obsoleta //TODO: por ahora asumo que sigue valiendo lo de desgaste 80
     }
 
     //- Sección de tripulación
@@ -435,5 +435,46 @@ public abstract class Nave  implements Combatiente {
 
     public RadarLargoAlcance getRadarLA() {
         return radarLA;
+    }
+
+    /**
+     * Intenta aplicar conjuntamente los costos iniciales de una misión.
+     *
+     * Si alguno de los costos no puede aplicarse íntegramente,
+     * la nave permanece sin modificaciones.
+     *
+     * Se permite llegar exactamente a los límites:
+     * - Combustible: 0
+     * - Energía: 0
+     * - Desgaste: 100
+     *
+     * Estos valores pueden provocar la destrucción de la nave.
+     *
+     * @return true si se aplicaron todos los costos, false si no.
+     */
+    public boolean aplicarCostosIniciales(
+            int combustibleReq,
+            int energiaReq,
+            int desgasteReq) {
+
+        // 1. Validar que los costos sean positivos o cero.
+        if (combustibleReq < 0 || energiaReq < 0 || desgasteReq < 0) {
+            return false;
+        }
+
+        // 2. Comprobar que todos los costos puedan aplicarse.
+        if (this.combustible < combustibleReq ||
+                this.energia < energiaReq ||
+                desgasteReq > DESGASTE_MAX - this.desgaste) {
+            return false;
+        }
+
+        // 3. Aplicar todos los cambios.
+        // Llegados aquí, sabemos que los tres son posibles.
+        this.combustible -= combustibleReq;
+        this.energia -= energiaReq;
+        this.desgaste += desgasteReq;
+
+        return true;
     }
 }
