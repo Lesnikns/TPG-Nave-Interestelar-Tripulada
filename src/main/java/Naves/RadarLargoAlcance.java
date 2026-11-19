@@ -1,7 +1,5 @@
 package Naves;
 
-// debe tener un método para poder determinar una ruta entre a y b
-
 import DestinoTablero.Asteroide;
 import DestinoTablero.ElementoDelUniverso;
 import DestinoTablero.Posicion;
@@ -18,11 +16,6 @@ public class RadarLargoAlcance {
         return ruta.isEmpty() ? rutaDirecta(origen, destino) : ruta;
     }
 
-    // tuve que implementarlo con IA porque mi versión no funcionó;
-    // es independiente del resto por lo que todavía puedo intentar corregir lo mio,
-    // sino tendré que aprenderla de memoria.
-    //TODO: recordar modificar; No enviar sin confirmarlo.
-    /// TODO: quedan pendiente las consultas.
     private List<Posicion> rutaEsquivando(Tablero tablero,Posicion origen, Posicion destino) {
         ElementoDelUniverso[][] mapa = tablero.verTablero();
         int filas = mapa.length;
@@ -70,7 +63,6 @@ public class RadarLargoAlcance {
         return ruta;
     }
 
-    //esta fue la primera versión, no tiene mucho de RADAR.. se usa si el camino ya empieza bloqueado
     private List<Posicion> rutaDirecta(Posicion origen, Posicion destino) {
         List<Posicion> ruta = new ArrayList<>();
         int x = origen.getX();

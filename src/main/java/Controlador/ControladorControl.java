@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import Asistente.*;
+import DestinoTablero.Posicion;
 import Naves.SesionDeNave;
 import Vista.VistaControl;
 
@@ -55,11 +56,17 @@ public class ControladorControl implements ActionListener {
     }
 
     private Mision crearMision(int numero) {
-        return switch (numero) {
-            case 1 -> null; // M-01: pendiente (nave aliada)
-            case 2 -> new MisionRecoleccion(2, "Recolección", null);
-            case 3 -> null; // M-03: pendiente (base como destino)
-            default -> null;
-        };
+        switch (numero) {
+            case 1:
+                return new MisionIntercepcionAsistencia(1, "Intercepción y asistencia", null);
+            case 2:
+                return new MisionRecoleccion(2, "Recolección", null);
+            case 3:
+                var tablero = sesion.getNave().getAsistente().getTablero();
+                Posicion base = new Posicion(tablero.getX() / 2, tablero.getY() / 2);
+                return new MisionRetornoSeguro(3, "Retorno seguro", base);
+            default:
+                return null;
+        }
     }
 }

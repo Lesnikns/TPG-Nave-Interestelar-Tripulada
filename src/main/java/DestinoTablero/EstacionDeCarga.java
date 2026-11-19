@@ -1,30 +1,25 @@
+
 package DestinoTablero;
 
 import Asistente.*;
-import DestinoTablero.ElementoDelUniverso;
 import Naves.Nave;
 
 import java.util.Random;
 
 public class EstacionDeCarga implements ElementoDelUniverso {
-    private final int recarga = 20;
 
     /**
-     * Reabastece a la nave con energía y/o combustible al interactuar con la estación de carga.
-     * <p>
-     * Evalúa los niveles actuales de la nave: si ambos recursos están en nivel crítico (inferior al 25%),
-     * se recargan ambos obligatoriamente. Si solo uno se encuentra crítico, se prioriza ese recurso.
-     * En caso de que ninguno sea crítico, se selecciona uno aleatoriamente.
-     * La recarga calcula un objetivo aleatorio entre el 75% y el 100% de la capacidad de cada recurso a reabastecer.
-     * </p>
+     * Reabastece energía y/o combustible al interactuar con la estación.
      *
-     * <b>pre:</b> nave != null, asistente != null.<br>
-     * <b>post:</b> los recursos correspondientes de la nave se incrementan hasta alcanzar el porcentaje objetivo
-     * y se registra el evento en la bitácora mediante el asistente.
+     * Si ambos recursos están por debajo del 25%, recarga ambos.
+     * Si solamente uno está por debajo del 25%, prioriza ese recurso.
+     * Si ninguno es crítico, selecciona uno aleatoriamente.
      *
-     * @param nave nave espacial que ingresa a la estación y recibe el reabastecimiento. nave != null
-     * @param mision misión en curso durante el desplazamiento en el tablero
-     * @param asistente coordinador a través del cual se realiza la recarga y se asienta el evento en la bitácora. asistente != null
+     * El objetivo de cada recarga se determina aleatoriamente
+     * entre el 75% y el 100% de la capacidad correspondiente.
+     *
+     * Las ganancias reales se registran en la misión para
+     * que puedan incluirse en el informe final.
      */
     @Override
     public void interactuar(Nave nave, Mision mision, AsistenteDeComando asistente) {
@@ -43,7 +38,6 @@ public class EstacionDeCarga implements ElementoDelUniverso {
         boolean recargarCombustible = false;
 
         if (energiaCritica && combustibleCritico) {
-            // Ambos críticos: se cargan los dos obligatoriamente
             recargarEnergia = true;
             recargarCombustible = true;
         } else if (energiaCritica) {
@@ -51,53 +45,58 @@ public class EstacionDeCarga implements ElementoDelUniverso {
         } else if (combustibleCritico) {
             recargarCombustible = true;
         } else {
-            // Ninguno es crítico: elige uno 50/50 al azar
             if (random.nextBoolean()) {
                 recargarEnergia = true;
             } else {
                 recargarCombustible = true;
             }
         }
-
-        // Ejecución de recargas según corresponda
         if (recargarEnergia) {
-            aplicarRecargaEnergia(nave, asistente, random, maxEnergia, energiaActual);
+            int energiaGanada = aplicarRecargaEnergia(asistente, random, maxEnergia, energiaActual);
+            mision.registrarEnergiaGanada(energiaGanada);
         }
 
         if (recargarCombustible) {
-            aplicarRecargaCombustible(nave, asistente, random, maxCombustible, combustibleActual);
+            int combustibleGanado = aplicarRecargaCombustible(asistente, random, maxCombustible, combustibleActual);
+            mision.registrarCombustibleGanado(combustibleGanado);
         }
     }
 
-    private void aplicarRecargaEnergia(Nave nave, AsistenteDeComando asistente, Random random, int maxEnergia, int energiaActual) {
+    /**
+     * Recarga energía hasta el porcentaje objetivo.
+     * Devuelve la cantidad realmente aplicada.
+     */
+    private int aplicarRecargaEnergia(AsistenteDeComando asistente, Random random, int maxEnergia, int energiaActual) {
         int porcentajeObjetivo = 75 + random.nextInt(26); // Entre 75% y 100%
         int energiaObjetivo = (maxEnergia * porcentajeObjetivo) / 100;
         int cantidadACargar = Math.max(0, energiaObjetivo - energiaActual);
 
         if (cantidadACargar > 0) {
-            asistente.cargarEnergiaNave(cantidadACargar);
-            asistente.escribeBitacora(
-                    "Reabastecimiento en estación espacial: +" + cantidadACargar + " de energía (" + porcentajeObjetivo + "% alcanzado).",
-                    "EVENTO"
-            );
+            int energiaAplicada = asistente.recargarEnergiaNaveConTope(cantidadACargar);
+            asistente.escribeBitacora("Reabastecimiento en estación espacial: +" + energiaAplicada + " de energía (" + porcentajeObjetivo + "% objetivo).", "EVENTO");
+            return energiaAplicada;
         } else {
             asistente.escribeBitacora("Estación de Carga: La nave ya posee niveles óptimos de energía.", "EVENTO");
+            return 0;
         }
     }
 
-    private void aplicarRecargaCombustible(Nave nave, AsistenteDeComando asistente, Random random, int maxCombustible, int combustibleActual) {
+    /**
+     * Recarga combustible hasta el porcentaje objetivo.
+     * Devuelve la cantidad realmente aplicada.
+     */
+    private int aplicarRecargaCombustible(AsistenteDeComando asistente, Random random, int maxCombustible, int combustibleActual) {
         int porcentajeObjetivo = 75 + random.nextInt(26); // Entre 75% y 100%
         int combustibleObjetivo = (maxCombustible * porcentajeObjetivo) / 100;
         int cantidadACargar = Math.max(0, combustibleObjetivo - combustibleActual);
 
         if (cantidadACargar > 0) {
-            nave.cargarCombustible(cantidadACargar);
-            asistente.escribeBitacora(
-                    "Reabastecimiento en estación espacial: +" + cantidadACargar + " de combustible (" + porcentajeObjetivo + "% alcanzado).",
-                    "EVENTO"
-            );
+            int combustibleAplicado = asistente.recargarCombustibleNaveConTope(cantidadACargar);
+            asistente.escribeBitacora("Reabastecimiento en estación espacial: +" + combustibleAplicado + " de combustible (" + porcentajeObjetivo + "% objetivo).", "EVENTO");
+            return combustibleAplicado;
         } else {
             asistente.escribeBitacora("Estación de Carga: La nave ya posee niveles óptimos de combustible.", "EVENTO");
+            return 0;
         }
     }
 }

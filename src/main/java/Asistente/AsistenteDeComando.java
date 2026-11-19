@@ -5,7 +5,6 @@ import Excepciones.*;
 import Naves.Nave;
 import Tripulacion.Tripulante;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AsistenteDeComando{
@@ -40,8 +39,8 @@ public class AsistenteDeComando{
         bitacora.cargaEntrada(e);
     }
 
-    public void cargarEnergiaNave(int energia) {
-        nave.cargarEnergia(energia);
+    public boolean cargarEnergiaNave(int energia) {
+        return nave.cargarEnergia(energia);
     }
 
     public void liquidarHaberesMensuales() {
@@ -114,7 +113,36 @@ public class AsistenteDeComando{
     public int getCombustible() { return nave.getCombustible(); }
     public int getEnergia() { return nave.getEnergia(); }
     public int getDesgaste() { return nave.getDesgaste(); }
-
+    public void recargarTotalmenteRecursosNave() {
+        nave.recargarTotalmenteRecursos();
+    }
+    public void agregarGemasNave(int cantidad) {
+        nave.agregarGemas(cantidad);
+    }
+    public void entregarEnergiaNave(int cantidad) {
+        if (!nave.consumirEnergia(cantidad)) {
+            throw new IllegalStateException("No se pudo completar la transferencia de energía.");
+        }
+    }
+    public int recargarEnergiaNaveConTope(int cantidad) {
+        int anterior = nave.getEnergia();
+        nave.recargarEnergiaConTope(cantidad);
+        return nave.getEnergia() - anterior;
+    }
+    public int recargarCombustibleNaveConTope(int cantidad) {
+        int anterior = nave.getCombustible();
+        nave.recargarCombustibleConTope(cantidad);
+        return nave.getCombustible() - anterior;
+    }
+    public boolean naveEstaDestruida() {
+        return nave.estaDestruida();
+    }
+    public boolean naveEstaOperativa() {
+        return nave.enEstadoOperativo();
+    }
+    public void realizarMantenimientoNave() {
+        nave.realizarMantenimiento();
+    }
 
     public void cobrarCostoInicial(int combustible, int energia, int desgaste) {
 

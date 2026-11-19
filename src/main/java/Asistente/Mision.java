@@ -15,20 +15,52 @@ public abstract class Mision {
     protected int energiaInicial;
     protected int desgasteInicial;
     protected int combustibleGanado;   // para poder separar lo cargado de lo consumido
+    protected int transferido;
+    // Informe generado en la fase de evaluación.
+    private Informe informeFinal;
 
     protected boolean exito;
     protected List<Posicion> rutaCalculada;
     protected int energiaPerdida;
     protected int energiaGanada;
     protected int gemasRecolectadas;
+    protected int combustiblePerdido;
+    private String motivoFinalizacion;
 
-    public Mision(int id, String descripcion, Posicion destino) {
+    private enum EstadoResultado {
+        PENDIENTE,
+        PREPARANDO,
+        EJECUTANDO,
+        EXITOSA,
+        FALLIDA,
+        ABORTADA
+    }
+    private EstadoResultado estadoResultado = EstadoResultado.PENDIENTE;
+
+    private void reiniciarRegistroMision() {
+        this.exito = false;
+        this.combustibleInicial = 0;
+        this.energiaInicial = 0;
+        this.desgasteInicial = 0;
+        this.combustibleGanado = 0;
+        this.combustiblePerdido = 0;
+        this.energiaGanada = 0;
+        this.energiaPerdida = 0;
+        this.gemasRecolectadas = 0;
+        this.rutaCalculada = null;
+        this.motivoFinalizacion = null;
+        this.estadoResultado = EstadoResultado.PENDIENTE;
+        this.transferido = 0;
+        this.informeFinal = null;
+    }
+
+    public Mision(int id, String descripcion, Posicion destino,int combustible,int energia,int desgaste ) {
         this.id = id;
         this.descripcion = descripcion;
         this.destino = destino;
-        this.desgaste = 4;
-        this.combustible = 4;
-        this.energia = 0;
+        this.desgaste = desgaste;
+        this.combustible = combustible;
+        this.energia = energia;
         this.exito = false;
         this.energiaPerdida = 0;
         this.energiaGanada = 0;
@@ -50,10 +82,49 @@ public abstract class Mision {
 
     public final void iniciarMision(AsistenteDeComando asistente)
             throws NaveNoOperativaException, CombustibleInsuficienteException, EnergiaInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
-        prepararMision(asistente);
-        if (asistente.getNave().enEstadoOperativo()) {
+
+        reiniciarRegistroMision();
+        // Registrar recursos ANTES del despegue.
+        this.combustibleInicial = asistente.getCombustible();
+        this.energiaInicial = asistente.getEnergia();
+        this.desgasteInicial = asistente.getDesgaste();
+        boolean ejecucionIniciada = false;
+
+        try {
+            // Fase 1: preparación.
+            this.estadoResultado = EstadoResultado.PREPARANDO;
+            prepararMision(asistente);
+            if (!asistente.naveEstaOperativa()) {
+                throw new NaveNoOperativaException("La nave no está operativa para iniciar la misión.");
+            }
+
+            // Fase 2: ejecución.
+            ejecucionIniciada = true;
+            this.estadoResultado = EstadoResultado.EJECUTANDO;
             ejecutarMision(asistente);
+
+            if (this.exito) {
+                this.estadoResultado = EstadoResultado.EXITOSA;
+            } else {
+                this.estadoResultado = EstadoResultado.FALLIDA;
+                if (this.motivoFinalizacion == null) {
+                    this.motivoFinalizacion = "No se cumplieron las condiciones necesarias para completar la misión.";
+                }
+            }
+        } catch (NaveNoOperativaException | CombustibleInsuficienteException | EnergiaInsuficienteException | DesgasteCriticoException | MotorNoDisponibleException e) {
+            this.exito = false;
+            this.estadoResultado = ejecucionIniciada ? EstadoResultado.FALLIDA : EstadoResultado.ABORTADA;
+            this.motivoFinalizacion = e.getMessage();
+            throw e;
+        } catch (RuntimeException e) {
+            this.exito = false;
+            this.estadoResultado = ejecucionIniciada ? EstadoResultado.FALLIDA : EstadoResultado.ABORTADA;
+            this.motivoFinalizacion = "Error durante la misión: " + e.getMessage();
+            throw e;
+        } finally {
+            // Fase 3: evaluación.
             evaluarMision(asistente);
+            // Fase 4: cierre.
             finalizarMision(asistente);
         }
     }
@@ -75,21 +146,54 @@ public abstract class Mision {
     }
 
     protected void ejecutarMision(AsistenteDeComando asistente) {
-        combustibleInicial = asistente.getCombustible();
-        energiaInicial     = asistente.getEnergia();
-        desgasteInicial    = asistente.getDesgaste();
 
         asistente.despegar(combustible, energia, desgaste);
+
+        // Si los costos de despegue destruyeron la nave,
+        // la misión fracasa inmediatamente.
+        if (asistente.naveEstaDestruida()) {
+            this.exito = false;
+            this.motivoFinalizacion = "La nave fue destruida al aplicar los costos de despegue.";
+            asistente.escribeBitacora("Misión fallida: la nave fue destruida durante el despegue.", "ERROR");
+            return;
+        }
 
         //lo cambio
         int i = 0;                  // próxima posición de la ruta a alcanzar
         int turnosSinAvanzar = 0;
 
-        while (i < rutaCalculada.size() && !asistente.getNave().estaDestruida()) {
+        while (!asistente.naveEstaDestruida()) {
+
+            // 1. Inspeccionar la posición actual de la nave.
+            Posicion actual = asistente.getPosicionNave();
+            asistente.interactuarConElementoEn(actual, this);
+
+            // 2. Comprobar si la interacción destruyó la nave.
+            if (asistente.naveEstaDestruida()) {
+                this.exito = false;
+                asistente.escribeBitacora("Misión fallida: la nave fue destruida durante la interacción.", "ERROR");
+                return;
+            }
+
+            // 3. Comprobar si se alcanzó el destino.
+            if (actual.getX() == destino.getX() && actual.getY() == destino.getY()) {
+                break;
+            }
+
+            // 4. Comprobar que todavía haya posiciones por recorrer.
+            if (rutaCalculada == null || i >= rutaCalculada.size()) {
+                this.exito = false;
+                this.motivoFinalizacion ="Se agotó la ruta sin alcanzar el destino.";
+                asistente.escribeBitacora("Misión fallida: se agotó la ruta sin alcanzar el destino.", "ERROR");
+                return;
+            }
+
+            // 5. Identificar el siguiente casillero.
             Posicion siguiente = rutaCalculada.get(i);
-            boolean hayLugarParaWarp = i + 1 < rutaCalculada.size(); // al menos 2
+            boolean hayLugarParaWarp = i + 1 < rutaCalculada.size();
             int avanzados;
 
+            // 6. Planificar y ejecutar el movimiento.
             try {
                 if (turnosSinAvanzar >= MAX_TURNOS_SIN_AVANZAR) {
                     // Intentar salir del atasco mediante un salto normal.
@@ -101,15 +205,20 @@ public abstract class Mision {
                 }
             } catch (CombustibleInsuficienteException e) {
                 this.exito = false;
-                asistente.escribeBitacora(
-                        "Misión fallida: no se pudo realizar el movimiento. " +
-                                e.getMessage(),
-                        "ERROR"
-                );
+                this.motivoFinalizacion = e.getMessage();
+                asistente.escribeBitacora("Misión fallida: " + e.getMessage(), "ERROR");
                 return;
             }
 
+            // 7. Actualizar la posición si hubo movimiento.
             if (avanzados > 0) {
+                int restantes = rutaCalculada.size() - i;
+                if (avanzados > restantes) {
+                    this.exito = false;
+                    this.motivoFinalizacion ="El motor avanzó más posiciones que las disponibles en la ruta.";
+                    asistente.escribeBitacora("Misión fallida: el motor avanzó más posiciones que las disponibles en la ruta.", "ERROR");
+                    return;
+                }
 
                 i += avanzados;
 
@@ -117,55 +226,72 @@ public abstract class Mision {
 
                 asistente.moverNaveA(llegada);
 
-                // Comprobar si el costo del movimiento destruyó la nave.
-                if (asistente.getNave().estaDestruida()) {
+                // Comprobar si el movimiento agotó algún recurso.
+                if (asistente.naveEstaDestruida()) {
                     this.exito = false;
+                    this.motivoFinalizacion = "La nave fue destruida durante el movimiento.";
                     asistente.escribeBitacora(
                             "Misión fallida: la nave fue destruida durante el movimiento.",
                             "ERROR"
                     );
                     return;
                 }
-                asistente.interactuarConElementoEn(llegada, this);
                 turnosSinAvanzar = 0;
             } else {
                 turnosSinAvanzar++;
             }
 
-            // Fase final del turno: movimiento de tablero y breve retardo
-            if (!asistente.getNave().estaDestruida()) {
-                asistente.cerrarTurno();
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            } else {
-                asistente.escribeBitacora("Misión fallida: La nave quedó destruida durante el trayecto.", "ERROR");
+            // 8. Ejecutar el turno del tablero.
+            asistente.cerrarTurno();
+            // 9. Pausa para visualizar el avance.
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 this.exito = false;
+                this.motivoFinalizacion = "La ejecución fue interrumpida durante la espera entre turnos.";
+                asistente.escribeBitacora("Misión interrumpida durante la espera entre turnos.", "ERROR");
                 return;
             }
         }
 
-        if (!asistente.getNave().estaDestruida()) {
-            this.exito = verificarYEjecutarAccionDestino(asistente);
+        if (!asistente.naveEstaDestruida()) {
+            Posicion posicionFinal = asistente.getPosicionNave();
+            boolean llegoAlDestino = posicionFinal.getX() == destino.getX() && posicionFinal.getY() == destino.getY();
+            if (!llegoAlDestino) {
+                this.exito = false;
+                this.motivoFinalizacion = "La nave no alcanzó las coordenadas de destino.";
+                asistente.escribeBitacora("Misión fallida: la posición final no coincide con el destino.", "ERROR");
+            } else {
+                this.exito = verificarYEjecutarAccionDestino(asistente);
+                if (!this.exito && this.motivoFinalizacion == null) {
+                    this.motivoFinalizacion = "No se pudieron cumplir las condiciones requeridas en el destino.";
+                }
+            }
         }
     }
 
     public void evaluarMision(AsistenteDeComando asistente) {
-        int combustibleConsumido = combustibleInicial + combustibleGanado - asistente.getCombustible();
-        int energiaConsumida     = energiaInicial + energiaGanada - energiaPerdida - asistente.getEnergia();
-        int desgasteAcumulado    = asistente.getDesgaste() - desgasteInicial;
+        String resultado;
+        String causa;
 
+        if (this.exito) {
+            resultado = Informe.EXITOSA;
+            causa = "";
+        } else if (this.estadoResultado == EstadoResultado.ABORTADA) {
+            resultado = Informe.ABORTADA;
+            causa = this.motivoFinalizacion != null ? this.motivoFinalizacion : "La misión fue abortada durante la preparación.";
+        } else {
+            resultado = Informe.FALLIDA;
+            causa = this.motivoFinalizacion != null ? this.motivoFinalizacion : "La misión no pudo completarse.";
+        }
 
-        String resultado = this.exito ? "ÉXITO" : "FRACASO";
-        String balance = String.format(
-                "Informe Final M-0%d (%s) [%s]\n- Combustible consumido: %d\n- Energía consumida: %d\n- Desgaste acumulado: %d\n- Energía ganada: %d\n- Energía perdida (impactos): %d\n- Gemas recolectadas: %d",
-                id, descripcion, resultado, combustibleConsumido, energiaConsumida,
-                desgasteAcumulado, energiaGanada, energiaPerdida, gemasRecolectadas);
-        asistente.escribeBitacora(balance, this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
-        System.out.println(balance);
+        // Crear la fotografía final del estado de la nave.
+        this.informeFinal = new Informe(this, asistente.getNave(), resultado, causa, this.combustibleInicial, this.energiaInicial, this.desgasteInicial);
+
+        // Registrar el informe completo en la bitácora.
+        asistente.escribeBitacora(this.informeFinal.toString(), this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
+        System.out.println(this.informeFinal);
     }
 
     public void finalizarMision(AsistenteDeComando asistente) {
@@ -181,8 +307,58 @@ public abstract class Mision {
     protected abstract boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente);
     protected abstract void aplicarCierreDefinitivo(AsistenteDeComando asistente);
 
-    public void registrarEnergiaPerdida(int cantidad) { this.energiaPerdida += cantidad; }
-    public void registrarCombustibleGanado(int cantidad) { this.combustibleGanado += cantidad; }
-    public void registrarEnergiaGanada(int cantidad) { this.energiaGanada += cantidad; }
-    public void registrarGemasRecolectadas(int cantidad) { this.gemasRecolectadas += cantidad; }
+    public void registrarEnergiaPerdida(int cantidad) {
+        if (cantidad > 0) {
+            this.energiaPerdida += cantidad;
+        }
+    }
+    public void registrarEnergiaGanada(int cantidad) {
+        if (cantidad > 0) {
+            this.energiaGanada += cantidad;
+        }
+    }
+    public void registrarCombustibleGanado(int cantidad) {
+        if (cantidad > 0) {
+            this.combustibleGanado += cantidad;
+        }
+    }
+    public void registrarCombustiblePerdido(int cantidad) {
+        if (cantidad > 0) {
+            this.combustiblePerdido += cantidad;
+        }
+    }
+    public void registrarGemasRecolectadas(int cantidad) {
+        if (cantidad > 0) {
+            this.gemasRecolectadas += cantidad;
+        }
+    }
+    public void registrarTransferido(int cantidad) {
+        if (cantidad > 0) {
+            this.transferido += cantidad;
+        }
+    }
+
+    //para consultar desde el informe
+    public int getCombustibleGanado() {
+        return combustibleGanado;
+    }
+
+    public int getCombustiblePerdido() {
+        return combustiblePerdido;
+    }
+    public int getEnergiaGanada() {
+        return energiaGanada;
+    }
+    public int getEnergiaPerdida() {
+        return energiaPerdida;
+    }
+    public int getGemasRecolectadas() {
+        return gemasRecolectadas;
+    }
+    public int getTransferido() {
+        return transferido;
+    }
+    public Informe getInformeFinal() {
+        return informeFinal;
+    }
 }

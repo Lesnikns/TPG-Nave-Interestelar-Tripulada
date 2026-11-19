@@ -1,21 +1,16 @@
 package Asistente;
 
 import Naves.Nave;
-
 import java.util.Date;
 
 /**
- * Informe final de una mision (fase "evaluar" del ciclo de vida): registra si la mision resulto exitosa, fallida o abortada,
- * junto con el balance de los recursos de la nave durante el trayecto y lo obtenido o entregado por la mision.
- * El balance de cada recurso es el valor de la nave al evaluar menos su valor al comenzar la mision, por lo que incluye todo lo que paso en el recorrido
- * (costo inicial, saltos, asteroides, estaciones de carga). Las recompensas que se aplican en el cierre de la mision se informan aparte (gemas y transferido).
- * Es inmutable: copia los datos de la mision y de la nave al crearse y no guarda referencias a ellas, asi el informe no cambia aunque despues cambien la mision o la nave,
- * y la vista puede leerlo desde otro hilo sin riesgo.
- * <b>invariantes:</b> descripcion != null <br>
- * fecha != null, fijada en el instante de creacion <br>
- * resultado es EXITOSA, FALLIDA o ABORTADA <br>
- * causa != null, y si el resultado no es EXITOSA, causa != "" <br>
- * gemasGanadas &gt;= 0 y transferido &gt;= 0
+ * Informe final de una misión.
+ *
+ * Se confecciona durante la fase Evaluar, antes de aplicar
+ * los cambios definitivos de la fase Cerrar.
+ *
+ * Conserva una fotografía inmutable del resultado, los recursos
+ * de la nave y las estadísticas registradas durante el trayecto.
  */
 public class Informe {
     public static final String EXITOSA = "Exitosa";
@@ -27,152 +22,197 @@ public class Informe {
     private final Date fecha;
     private final String resultado;
     private final String causa;
+
+    // Combustible
+    private final int combustibleInicial;
+    private final int combustibleFinal;
+    private final int combustibleGanado;
+    private final int combustibleConsumido;
+    private final int combustiblePerdido;
     private final int balanceCombustible;
+
+    // Energía
+    private final int energiaInicial;
+    private final int energiaFinal;
+    private final int energiaGanada;
+    private final int energiaConsumida;
+    private final int energiaPerdida;
     private final int balanceEnergia;
+
+    // Desgaste
+    private final int desgasteInicial;
+    private final int desgasteFinal;
     private final int balanceDesgaste;
-    //private final int gemasGanadas;
-    //private final int transferido;
+
+    // Resultados particulares de las misiones
+    private final int gemasGanadas;
+    private final int transferido;
 
     /**
-     * Devuelve el numero de la mision informada
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio el id de la mision, sin modificar el informe
-     * @return id de la mision
-     */
-    public int getId() {
-        return id;
-    }
-    /**
-     * Devuelve la descripcion de la mision informada
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio la descripcion de la mision, sin modificar el informe
-     * @return descripcion de la mision
-     */
-    public String getDescripcion() {
-        return descripcion;
-    }
-    /**
-     * Devuelve el momento en que se confecciono el informe
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio una copia de la fecha (modificar la copia no cambia el informe)
-     * @return fecha de confeccion del informe
-     */
-    public Date getFecha() {
-        return new Date(fecha.getTime());
-    }
-    /**
-     * Devuelve el resultado de la mision
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio EXITOSA, FALLIDA o ABORTADA, sin modificar el informe
-     * @return resultado de la mision
-     */
-    public String getResultado() {
-        return resultado;
-    }
-    /**
-     * Devuelve el motivo por el que la mision no fue exitosa
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio la causa ("" si la mision fue exitosa), sin modificar el informe
-     * @return causa del fallo o del aborto de la mision
-     */
-    public String getCausa() {
-        return causa;
-    }
-    /**
-     * Devuelve el balance de combustible durante la mision (valor al evaluar menos valor al comenzar)
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio el balance: negativo si la nave consumio combustible, positivo si gano
-     * @return balance de combustible
-     */
-    public int getBalanceCombustible() {
-        return balanceCombustible;
-    }
-    /**
-     * Devuelve el balance de energia durante la mision (valor al evaluar menos valor al comenzar)
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio el balance: negativo si la nave consumio energia, positivo si gano
-     * @return balance de energia
-     */
-    public int getBalanceEnergia() {
-        return balanceEnergia;
-    }
-    /**
-     * Devuelve el balance de desgaste durante la mision (valor al evaluar menos valor al comenzar)
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio el balance: positivo si el desgaste aumento
-     * @return balance de desgaste
-     */
-    public int getBalanceDesgaste() {
-        return balanceDesgaste;
-    }
-    /**
-     * Devuelve las gemas que obtuvo la mision (solo la mision de recoleccion obtiene gemas)
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio la cantidad de gemas, mayor o igual a cero
-     * @return gemas ganadas
-     */
-    //public int getGemasGanadas() {
-     //   return gemasGanadas;
-    //}
-    /**
-     * Devuelve los recursos entregados a la nave aliada (solo la mision de intercepcion y asistencia transfiere recursos)
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio la cantidad transferida, mayor o igual a cero
-     * @return recursos transferidos
-     */
-    //public int getTransferido() {
-     //   return transferido;
-    //}
-
-    /**
-     * Genera el texto del informe, para mostrarlo en el historial de informes
-     * <b>pre:</b> ninguna <br>
-     * <b>post:</b> se devolvio un String con la mision, el resultado (y la causa si no fue exitosa), el balance de cada recurso con su signo, lo obtenido y la fecha. El informe no se modifico
-     * @return el informe como texto, != null y != ""
-     */
-    @Override
-    public String toString() {
-        String texto = "Informe M-0" + id + " (" + descripcion + "): " + resultado;
-        if (!causa.isEmpty())
-            texto += " - " + causa;
-        texto += " | combustible " + String.format("%+d", balanceCombustible)
-                + ", energia " + String.format("%+d", balanceEnergia)
-                + ", desgaste " + String.format("%+d", balanceDesgaste)
-               // + " | gemas " + gemasGanadas + ", transferido " + transferido
-                + " | " + fecha + "\n";
-        return texto;
-    }
-
-    /**
-     * Se construye el informe final de una mision, copiando los datos de la mision y los recursos actuales de la nave
-     * <b>pre:</b> mision != null; nave != null; resultado es EXITOSA, FALLIDA o ABORTADA; causa != null, y si el resultado no es EXITOSA, causa != "";
-     * combustibleInicial, energiaInicial y desgasteInicial &gt;= 0 (los valores de la nave al comenzar la mision); mision.getGemasGanadas() &gt;= 0 y mision.getTransferido() &gt;= 0 <br>
-     * <b>post:</b> se ha creado el informe con la fecha actual, el resultado y la causa dados, y el balance de cada recurso igual al valor actual de la nave menos su valor inicial
-     * @param mision - mision informada (se copian su id, su descripcion, las gemas ganadas y lo transferido). mision != null
-     * @param nave - nave que realizo la mision (se copian sus recursos actuales, antes de aplicar las recompensas del cierre). nave != null
-     * @param resultado - resultado de la mision. Informe.EXITOSA, Informe.FALLIDA o Informe.ABORTADA
-     * @param causa - motivo del fallo o del aborto ("" si fue exitosa). causa != null
-     * @param combustibleInicial - combustible de la nave al comenzar la mision. combustibleInicial &gt;= 0
-     * @param energiaInicial - energia de la nave al comenzar la mision. energiaInicial &gt;= 0
-     * @param desgasteInicial - desgaste de la nave al comenzar la mision. desgasteInicial &gt;= 0
+     * Construye el informe copiando los datos de la misión y de la nave.
+     *
+     * Los balances y consumos se calculan con los valores de la nave
+     * anteriores al cierre definitivo.
      */
     public Informe(Mision mision, Nave nave, String resultado, String causa, int combustibleInicial, int energiaInicial, int desgasteInicial) {
-        assert mision != null : "el informe necesita una mision";
-        assert nave != null : "el informe necesita la nave de la mision";
-        assert EXITOSA.equals(resultado) || FALLIDA.equals(resultado) || ABORTADA.equals(resultado) : "resultado invalido: " + resultado;
-        assert causa != null : "la causa no puede ser nula (vacia si la mision fue exitosa)";
-        assert EXITOSA.equals(resultado) || !causa.isEmpty() : "una mision fallida o abortada debe informar su causa";
-        assert combustibleInicial >= 0 && energiaInicial >= 0 && desgasteInicial >= 0 : "los valores iniciales no pueden ser negativos";
-        //assert mision.getGemasGanadas() >= 0 && mision.getTransferido() >= 0 : "las gemas y lo transferido no pueden ser negativos";
+        if (mision == null || nave == null) {
+            throw new IllegalArgumentException("El informe necesita una misión y una nave.");
+        }
+
+        if (!EXITOSA.equals(resultado) && !FALLIDA.equals(resultado) && !ABORTADA.equals(resultado)) {
+            throw new IllegalArgumentException("Resultado de misión inválido: " + resultado);
+        }
+
+        if (causa == null) {
+            throw new IllegalArgumentException("La causa no puede ser nula.");
+        }
+
+        if (!EXITOSA.equals(resultado) && causa.trim().isEmpty()) {
+            throw new IllegalArgumentException("Una misión fallida o abortada debe informar su causa.");
+        }
+
+        if (combustibleInicial < 0 || energiaInicial < 0 || desgasteInicial < 0) {
+            throw new IllegalArgumentException("Los valores iniciales no pueden ser negativos.");
+        }
+
+        // Identificación
         this.id = mision.getId();
         this.descripcion = mision.getDescripcion();
         this.fecha = new Date();
         this.resultado = resultado;
         this.causa = causa;
-        this.balanceCombustible = nave.getCombustible() - combustibleInicial;
-        this.balanceEnergia = nave.getEnergia() - energiaInicial;
-        this.balanceDesgaste = nave.getDesgaste() - desgasteInicial;
-        //this.gemasGanadas = mision.getGemasGanadas();
-        //this.transferido = mision.getTransferido();
+
+        // Capturar valores finales de la nave.
+        this.combustibleInicial = combustibleInicial;
+        this.combustibleFinal = nave.getCombustible();
+        this.energiaInicial = energiaInicial;
+        this.energiaFinal = nave.getEnergia();
+        this.desgasteInicial = desgasteInicial;
+        this.desgasteFinal = nave.getDesgaste();
+
+        // Copiar estadísticas de combustible.
+        this.combustibleGanado = mision.getCombustibleGanado();
+        this.combustiblePerdido = mision.getCombustiblePerdido();
+        this.combustibleConsumido = combustibleInicial + combustibleGanado - combustiblePerdido - combustibleFinal;
+        this.balanceCombustible = combustibleFinal - combustibleInicial;
+
+        // Copiar estadísticas de energía.
+        this.energiaGanada = mision.getEnergiaGanada();
+        this.energiaPerdida = mision.getEnergiaPerdida();
+        this.energiaConsumida = energiaInicial + energiaGanada - energiaPerdida - energiaFinal;
+        this.balanceEnergia = energiaFinal - energiaInicial;
+
+        // Desgaste acumulado.
+        this.balanceDesgaste = desgasteFinal - desgasteInicial;
+
+        // Resultados particulares.
+        this.gemasGanadas = mision.getGemasRecolectadas();
+        this.transferido = mision.getTransferido();
+    }
+
+    public int getId() {
+        return id;
+    }
+    public String getDescripcion() {
+        return descripcion;
+    }
+    public Date getFecha() {
+        return new Date(fecha.getTime());
+    }
+    public String getResultado() {
+        return resultado;
+    }
+    public String getCausa() {
+        return causa;
+    }
+    public int getCombustibleInicial() {
+        return combustibleInicial;
+    }
+    public int getCombustibleFinal() {
+        return combustibleFinal;
+    }
+    public int getCombustibleGanado() {
+        return combustibleGanado;
+    }
+    public int getCombustibleConsumido() {
+        return combustibleConsumido;
+    }
+    public int getCombustiblePerdido() {
+        return combustiblePerdido;
+    }
+    public int getBalanceCombustible() {
+        return balanceCombustible;
+    }
+    public int getEnergiaInicial() {
+        return energiaInicial;
+    }
+    public int getEnergiaFinal() {
+        return energiaFinal;
+    }
+    public int getEnergiaGanada() {
+        return energiaGanada;
+    }
+    public int getEnergiaConsumida() {
+        return energiaConsumida;
+    }
+    public int getEnergiaPerdida() {
+        return energiaPerdida;
+    }
+    public int getBalanceEnergia() {
+        return balanceEnergia;
+    }
+
+    public int getDesgasteInicial() {
+        return desgasteInicial;
+    }
+
+    public int getDesgasteFinal() {
+        return desgasteFinal;
+    }
+
+    public int getBalanceDesgaste() {
+        return balanceDesgaste;
+    }
+    public int getGemasGanadas() {
+        return gemasGanadas;
+    }
+    public int getTransferido() {
+        return transferido;
+    }
+
+    /**
+     * Genera la representación textual del informe.
+     */
+    @Override
+    public String toString() {
+        return "INFORME FINAL M-0" + id + " (" + descripcion + ")\n" +
+                "Fecha: " + fecha + "\n" +
+                "Resultado: " + resultado + "\n" +
+                "Causa: " + (causa.isEmpty() ? "Ninguna" : causa) + "\n\n" +
+
+                "COMBUSTIBLE\n" +
+                "- Inicial: " + combustibleInicial + "\n" +
+                "- Ganado: +" + combustibleGanado + "\n" +
+                "- Consumido: -" + combustibleConsumido + "\n" +
+                "- Perdido: -" + combustiblePerdido + "\n" +
+                "- Final: " + combustibleFinal + "\n" +
+                "- Balance: " + (balanceCombustible >= 0 ? "+" : "") + balanceCombustible + "\n\n" +
+
+                "ENERGÍA\n" +
+                "- Inicial: " + energiaInicial + "\n" +
+                "- Ganada: +" + energiaGanada + "\n" +
+                "- Consumida: -" + energiaConsumida + "\n" +
+                "- Perdida: -" + energiaPerdida + "\n" +
+                "- Final: " + energiaFinal + "\n" +
+                "- Balance: " + (balanceEnergia >= 0 ? "+" : "") + balanceEnergia + "\n\n" +
+
+                "DESGASTE\n" +
+                "- Inicial: " + desgasteInicial + "\n" +
+                "- Final: " + desgasteFinal + "\n" +
+                "- Balance: " + (balanceDesgaste >= 0 ? "+" : "") + balanceDesgaste + "\n\n" +
+
+                "RESULTADOS PARTICULARES\n" +
+                "- Gemas ganadas: " + gemasGanadas + "\n" +
+                "- Recursos transferidos: " + transferido;
     }
 }
