@@ -1,6 +1,7 @@
 package Controlador;
 
 import Asistente.AsistenteDeComando;
+import Asistente.HistorialDeInformes;
 import Asistente.PublicadorDeTurnos;
 import DestinoTablero.CantidadDeElementosSuperaCasillaException;
 import DestinoTablero.DimensionesDeTableroInconsistentesException;
@@ -26,14 +27,16 @@ import java.awt.event.ActionListener;
 public class ControladorCreacion implements ActionListener {
     private VistaCreacion vista;
     private SesionDeNave sesion;
-    private final FabricaDeTableros fabricaTableros = new FabricaDeTableros(10,10);
+    private final FabricaDeTableros fabricaTableros = new FabricaDeTableros();
     private FabricaDeNaves fabrica = new FabricaDeNaves();
     private PublicadorDeTurnos publicador;
+    private HistorialDeInformes historial;
 
-    public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion, PublicadorDeTurnos publicador) {
+    public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion, PublicadorDeTurnos publicador, HistorialDeInformes historial) {
         this.vista = vista;
         this.sesion = sesion;
         this.publicador = publicador;
+        this.historial=historial;
         vista.setControlador(this);
     }
 
@@ -60,7 +63,7 @@ public class ControladorCreacion implements ActionListener {
                 Nave nave = fabrica.getNave(vista.getTipoNave().toLowerCase());
                 //creo AdC y luego se lo asigno... necesito el tablero también; TODO: Tablero, fabricas,... (revisar, está así nomás o no llego)
                 Tablero tablero = fabricaTableros.crear();
-                AsistenteDeComando asistente = new AsistenteDeComando(nave, tablero, publicador);
+                AsistenteDeComando asistente = new AsistenteDeComando(nave, tablero, publicador,historial);
                 nave.setAsistente(asistente);
 	            sesion.setNave(nave);
                 asistente.publicarTurno();

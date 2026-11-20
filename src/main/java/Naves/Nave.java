@@ -477,4 +477,8 @@ public abstract class Nave  implements Combatiente {
 
         return true;
     }
+
+    public String getEstadoMotor() {
+        return this.getMotor().getNombreEstado();
+    }
 }

@@ -13,12 +13,14 @@ public class AsistenteDeComando{
     private Tablero tablero;
     private Destino destino;
     private final PublicadorDeTurnos turnos;
+    private final HistorialDeInformes historial;
 
-    public AsistenteDeComando(Nave nave, Tablero tablero, PublicadorDeTurnos turnos) {
+    public AsistenteDeComando(Nave nave, Tablero tablero, PublicadorDeTurnos turnos, HistorialDeInformes historial) {
         this.nave = nave;
         this.turnos = turnos;
         this.bitacora = new Bitacora();
         this.tablero = tablero;
+        this.historial = historial;
         if (tablero != null) {
             this.destino = new Destino(tablero);
         }
@@ -212,7 +214,7 @@ public class AsistenteDeComando{
     /** Saca ambas fotos en el hilo de la misión y avisa. Reemplaza a publicarRecursos(). */
     public void publicarTurno() {
         if (tablero == null) return;
-        EstadoRecursos r = new EstadoRecursos(nave.getCombustible(), nave.getEnergia(), nave.getDesgaste(), nave.getInventarioGemas(), nave.estaDestruida());
+        EstadoRecursos r = new EstadoRecursos(nave.getCombustible(), nave.getEnergia(), nave.getDesgaste(), nave.getInventarioGemas(), nave.estaDestruida(),nave.getEstadoMotor());
         EstadoTablero t = new EstadoTablero(tablero);
         turnos.publicar(new EstadoTurno(t, r));
     }
@@ -227,4 +229,11 @@ public class AsistenteDeComando{
         moverElementosTablero();
         publicarTurno();
     }
+
+    //--- ahora para el historial de informes
+    void publicarInforme(Informe informe){
+        //asistente necesita recibir la referencia al HistorialDeInformes, que debe crearse al iniciar el sistema
+        historial.agregarInforme(informe);
+    }
+
 }

@@ -1,9 +1,6 @@
 package Vista;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
@@ -29,6 +26,8 @@ public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurn
     private JProgressBar barraDesgaste = new JProgressBar(0, 100);
     private JLabel etiquetaGemas = new JLabel("");
     private JLabel etiquetaDestruida = new JLabel("");
+    private JLabel etiquetaEstadoMotor = new JLabel("");
+
 
     private JComboBox<String> comboMision = new JComboBox<>(new String[] {
             "M-01 Intercepción y asistencia", "M-02 Recolección", "M-03 Retorno a punto seguro"});
@@ -36,7 +35,7 @@ public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurn
     private JLabel etiquetaEstado = new JLabel("Sin misión en curso");
 
     private PanelTablero panelTablero = new PanelTablero();
-    private JPanel zonaBitacora = new JPanel(new BorderLayout()); // la completa la Persona 4
+    private JPanel zonaBitacora = new JPanel(new BorderLayout());
 
     public VistaControl() {
         setLayout(new BorderLayout(10, 10));
@@ -57,6 +56,8 @@ public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurn
         panelRecursos.add(etiquetaGemas);
         panelRecursos.add(new JLabel("Destruida:"));
         panelRecursos.add(etiquetaDestruida);
+        panelRecursos.add(new JLabel("Estado del Motor:"));
+        panelRecursos.add(etiquetaEstadoMotor);
 
         JPanel panelMision = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         panelMision.setBorder(BorderFactory.createTitledBorder("Misión"));
@@ -71,11 +72,13 @@ public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurn
         JPanel arriba = new JPanel(new BorderLayout(10, 10));
         arriba.add(izquierda, BorderLayout.WEST);
         arriba.add(zonaBitacora, BorderLayout.CENTER);
+        zonaBitacora.setPreferredSize(new Dimension(400, 200));
 
         panelTablero.setBorder(BorderFactory.createTitledBorder("Tablero"));
 
         add(arriba, BorderLayout.NORTH);
-        add(panelTablero, BorderLayout.CENTER);
+        JScrollPane scrollTablero = new JScrollPane(panelTablero);
+        add(scrollTablero, BorderLayout.CENTER);
 
         botonIniciar.setActionCommand(INICIAR_MISION);
     }
@@ -89,10 +92,12 @@ public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurn
         return comboMision.getSelectedIndex() + 1;
     }
 
-    /** Lo usa la Persona 4 para ubicar bitácora e informes en esta sección */
-    public void setPanelBitacora(JPanel panel) {
+    public void setPanelesRegistro(JPanel bitacora, JPanel informes) {
+        JTabbedPane pestanas = new JTabbedPane();
+        pestanas.addTab("Bitácora", bitacora);
+        pestanas.addTab("Informes", informes);
         zonaBitacora.removeAll();
-        zonaBitacora.add(panel, BorderLayout.CENTER);
+        zonaBitacora.add(pestanas, BorderLayout.CENTER);
         zonaBitacora.revalidate();
     }
 
@@ -109,10 +114,40 @@ public class VistaControl extends JPanel implements IObservadorModelo<EstadoTurn
             etiquetaDestruida.setText("No destruida");
             etiquetaDestruida.setForeground(Color.GREEN);
         }
+        // String[] nomEstados = {"Disponible","Preparando salto","Salto warp","Enfriamiento"};
+        switch (r.getEstadoMotor()) {
+            case "Disponible" -> {
+                etiquetaEstadoMotor.setText("Disponible");
+                etiquetaEstadoMotor.setForeground(Color.MAGENTA);
+            }
+            case "Preparando salto" -> {
+                etiquetaEstadoMotor.setText("Preparando salto");
+                etiquetaEstadoMotor.setForeground(Color.BLUE);
+            }
+            case "Salto warp" -> {
+                etiquetaEstadoMotor.setText("Salto warp");
+                etiquetaEstadoMotor.setForeground(Color.ORANGE);
+            }
+            default -> {
+                etiquetaEstadoMotor.setText("Enfriamiento");
+                etiquetaEstadoMotor.setForeground(Color.CYAN);
+            }
+        }
     }
 
     public void mostrarTablero(EstadoTablero t) {
         panelTablero.setEstado(t);
+
+        int lado = 20;
+
+        panelTablero.scrollRectToVisible(
+                new Rectangle(
+                        t.getColumnaNave() * lado,
+                        t.getFilaNave() * lado,
+                        lado,
+                        lado
+                )
+        );
     }
 
     public void setMisionEnCurso(boolean enCurso) {

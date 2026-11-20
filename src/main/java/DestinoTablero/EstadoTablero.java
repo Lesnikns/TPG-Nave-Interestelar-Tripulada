@@ -47,4 +47,10 @@ public class EstadoTablero {
     public boolean hayObjetivoEn(int fila, int columna) { return fila == objetivoX && columna == objetivoY; }
     /** @return nombre de la clase del elemento de la casilla, o null si esta vacia */
     public String getElementoEn(int fila, int columna) { return casillas[fila][columna]; }
+    public int getFilaNave(){
+        return naveX;
+    }
+    public int getColumnaNave(){
+        return naveY;
+    }
 }

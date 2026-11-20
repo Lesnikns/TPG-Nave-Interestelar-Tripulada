@@ -245,7 +245,7 @@ public abstract class Mision {
             asistente.cerrarTurno();
             // 9. Pausa para visualizar el avance.
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 this.exito = false;
@@ -291,6 +291,7 @@ public abstract class Mision {
 
         // Registrar el informe completo en la bitácora.
         asistente.escribeBitacora(this.informeFinal.toString(), this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
+        asistente.publicarInforme(informeFinal);
         System.out.println(this.informeFinal);
     }
 

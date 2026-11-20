@@ -1,7 +1,6 @@
 package Vista;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import javax.swing.JPanel;
 
 import DestinoTablero.EstadoTablero;
@@ -11,6 +10,22 @@ public class PanelTablero extends JPanel {
 
     public void setEstado(EstadoTablero estado) {
         this.estado = estado;
+
+
+
+        if (estado != null) {
+            int lado = 20;
+            setPreferredSize(new Dimension(
+                    estado.getColumnas() * lado,
+                    estado.getFilas() * lado
+            ));
+            int filaNave = estado.getFilaNave();
+            int columnaNave = estado.getColumnaNave();
+            int x = columnaNave * lado;
+            int y = filaNave * lado;
+            revalidate(); // avisa al JScrollPane
+        }
+
         repaint();
     }
 
@@ -20,13 +35,14 @@ public class PanelTablero extends JPanel {
         EstadoTablero e = estado;                 // copia local
         if (e == null) return;
 
-        int lado = Math.max(1, Math.min(getWidth() / e.getColumnas(), getHeight() / e.getFilas()));
+        int lado = 20;
         for (int f = 0; f < e.getFilas(); f++) {
             for (int c = 0; c < e.getColumnas(); c++) {
                 g.setColor(colorDe(e, f, c));
                 g.fillRect(c * lado, f * lado, lado - 1, lado - 1);
             }
         }
+
     }
 
     private Color colorDe(EstadoTablero e, int f, int c) {

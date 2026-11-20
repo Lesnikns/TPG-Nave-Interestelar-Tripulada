@@ -31,7 +31,8 @@ public class MotorWarp{
 	 * <b>post:</b> se devolvio una referencia al nombre de estado
 	 * @return el nombre de estado
 	 */
-	String getNombreEstado() {
+	// lo hago public para poder agregarlo al panel, ver si el enunciado pide ser estricto con "solo saltar y saltarWarp"
+	public String getNombreEstado() {
 		return this.nombreEstado;
 	}
 

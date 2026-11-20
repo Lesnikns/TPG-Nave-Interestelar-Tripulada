@@ -3,6 +3,7 @@ import javax.swing.SwingUtilities;
 
 import Asistente.EstadoRecursos;
 import Asistente.EstadoTurno;
+import Asistente.HistorialDeInformes;
 import Asistente.PublicadorDeTurnos;
 import Controlador.ControladorControl;
 import Controlador.ControladorCreacion;
@@ -42,9 +43,10 @@ public class TestSistema{
     private static void iniciar(Negocio servicio) {
         SesionDeNave sesion = new SesionDeNave();
 
+        PublicadorDeTurnos publicador = new PublicadorDeTurnos();
+        HistorialDeInformes historial = new HistorialDeInformes();
 
         // Vistas
-        PublicadorDeTurnos publicador = new PublicadorDeTurnos();
         VistaControl vistaControl = new VistaControl();
         VistaLogin vistaLogin = new VistaLogin();
         VistaRegistro vistaRegistro = new VistaRegistro();
@@ -60,11 +62,17 @@ public class TestSistema{
 
         // Agregar mas paneles con ventana.agregarPanel(Titulo, vista, y un booleano que indica si el panel requiere
         // el uso de la nave o no)
+        PanelInformes panelInformes = new PanelInformes(historial);
+        //ventana.agregarPanel("Informes", panelInformes, false);   // pestaña temporal para probar
+
+        PanelBitacora panelBitacora = new PanelBitacora(sesion);
+        //ventana.agregarPanel("Bitácora", panelBitacora, true);
+        vistaControl.setPanelesRegistro(panelBitacora, panelInformes);
         publicador.agregarObservador(vistaControl);
         new ControladorControl(vistaControl, sesion);
         new ControladorLogin(vistaLogin, ventana, servicio);
         new ControladorRegistro(vistaRegistro, ventana, servicio);
-        new ControladorCreacion(vistaCreacion, sesion, publicador);
+        new ControladorCreacion(vistaCreacion, sesion, publicador,historial);
 
         // Las pestañas que necesitan nave se habilitan cuando la sesión tiene una
         sesion.agregarObservador(new IObservadorModelo<String>() {
