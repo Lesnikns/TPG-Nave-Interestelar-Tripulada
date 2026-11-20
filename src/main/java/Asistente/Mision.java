@@ -1,121 +1,134 @@
 package Asistente;
 
-import Excepciones.CombustibleInsuficienteException;
-import Excepciones.DesgasteCriticoException;
-import Excepciones.MotorNoDisponibleException;
-import Excepciones.NaveNoOperativaException;
+import DestinoTablero.Posicion;
+import java.util.List;
+import Excepciones.*;
 
 public abstract class Mision {
     private int id;
     private String descripcion;
-    private String destino;
-    protected int energia; // Actúa como bonificación
-    protected int combustible; // Costo operativo
-    protected int desgaste; // Costo operativo
+    protected Posicion destino;
+    protected int energia;
+    protected int combustible;
+    protected int desgaste;
 
-    // Getters
-    public int getId() {
-        return id;
-    }
-    public String getDescripcion() {
-        return descripcion;
-    }
-    public String getDestino() {
-        return destino;
-    }
-    public int getCombustible() {
-        return combustible;
-    }
-    public int getEnergia() {
-        return energia;
-    }
-    public int getDesgaste() {
-        return desgaste;
-    }
+    protected boolean exito;
+    protected List<Posicion> rutaCalculada;
+    protected int energiaPerdida;
+    protected int energiaGanada;
+    protected int gemasRecolectadas;
 
-    // Setters
-    public void setDestino(String destino) {
-        this.destino = destino;
-    }
-    public void setCombustible(int combustible) {
-        this.combustible = combustible;
-    }
-    public void setEnergia(int energia) {
-        this.energia = energia;
-    }
-    public void setDesgaste(int desgaste) {
-        this.desgaste = desgaste;
-    }
-
-    public Mision(int id, String descripcion, String destino) {
+    public Mision(int id, String descripcion, Posicion destino) {
         this.id = id;
         this.descripcion = descripcion;
         this.destino = destino;
         this.desgaste = 4;
         this.combustible = 4;
-        this.energia = 0; // Por defecto no da bonificacion
+        this.energia = 0;
+        this.exito = false;
+        this.energiaPerdida = 0;
+        this.energiaGanada = 0;
+        this.gemasRecolectadas = 0;
     }
 
-    /**
-     * Template Method que define el ciclo de vida inalterable de una mision.
-     * <b>pre:</b> asistente != null y tiene una nave asignada <br>
-     * <b>post:</b> se ejecuto estrictamente la secuencia: preparar, ejecutar, consecuencias y finalizar. La bitacora y los recursos reflejan la operacion
-     *
-     * @param asistente - coordinador a traves del cual la mision operara. asistente != null
-     * @throws Exception si la mision es abortada por falta de recursos o disponibilidad del motor
-     */
-    public final void iniciarMision(AsistenteDeComando asistente) throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
+    public int getId() { return id; }
+    public String getDescripcion() { return descripcion; }
+    public Posicion getDestino() { return destino; }
+    public void setDestino(Posicion destino) { this.destino = destino; }
+    public int getCombustible() { return combustible; }
+    public int getEnergia() { return energia; }
+    public int getDesgaste() { return desgaste; }
+    public boolean isExito() { return exito; }
+
+    public void setCombustible(int combustible) { this.combustible = combustible; }
+    public void setEnergia(int energia) { this.energia = energia; }
+    public void setDesgaste(int desgaste) { this.desgaste = desgaste; }
+
+    public final void iniciarMision(AsistenteDeComando asistente)
+            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
         prepararMision(asistente);
-        ejecutarMision(asistente);
-        aplicarConsecuencias(asistente);
-        finalizarMision(asistente);
+        if (asistente.getNave().enEstadoOperativo()) {
+            ejecutarMision(asistente);
+            evaluarMision(asistente);
+            finalizarMision(asistente);
+        }
     }
 
-    /**
-     * Valida que la nave este en condiciones operativas antes de actuar.
-     * <b>pre:</b> asistente != null <br>
-     * <b>post:</b> si la validacion de recursos y motor es exitosa, la mision es autorizada. Si falla, se lanza una excepcion, el estado de la nave permanece intacto y se aborta la ejecucion
-     *
-     * @param asistente coordinador encargado de validar a la nave.asistente != null
-     * @throws Exception si la nave no esta operativa, recursos son insuficientes o el motor no se encuentra disponible
-     */
-    public void prepararMision(AsistenteDeComando asistente) throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
-        System.out.println("Iniciando mision " + this.descripcion);
-        asistente.escribeBitacora("Iniciando mision M-0" + this.id + ": " + this.descripcion, "EVENTO");
+    public void prepararMision(AsistenteDeComando asistente)
+            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException, MotorNoDisponibleException {
+        System.out.println("Iniciando preparación de M-0" + this.id + ": " + this.descripcion);
+        asistente.escribeBitacora("Iniciando preparación de M-0" + this.id + ": " + this.descripcion, "EVENTO");
 
-        // El asistente valida y, si algo sale mal, lanza sus propias excepciones
         asistente.verificarRecursos(this.combustible, this.desgaste);
         asistente.verificarMotorDisponible();
+
+        if (this.destino == null) {
+            this.destino = asistente.obtenerObjetivoTablero();
+        }
+
+        this.rutaCalculada = asistente.obtenerRutaLargoAlcance(this.destino);
     }
 
-    /**
-     * Ejecuta las acciones especificas de la mision concreta (implementado en subclases).
-     * <b>pre:</b> la mision supero con exito las validaciones de prepararMision. asistente != null <br>
-     * <b>post:</b> se le ordeno al asistente realizar el salto y cobrar los costos operativos (combustible y desgaste). Se imprimieron los reportes correspondientes
-     *
-     * @param asistente - coordinador que ordenara el salto a la nave. asistente != null
-     */
-    public abstract void ejecutarMision(AsistenteDeComando asistente);
+    public void ejecutarMision(AsistenteDeComando asistente) {
+        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
+        asistente.escribeBitacora("Despegue ejecutado. Costo: " + this.combustible + " combustible, " + this.desgaste + " desgaste.", "EVENTO");
 
-    /**
-     * Otorga las bonificaciones correspondientes al cumplimiento de la mision.
-     * <b>pre:</b> la etapa ejecutarMision concluyo de manera exitosa. asistente != null <br>
-     * <b>post:</b> se le ordeno al asistente recargar la energia de la nave si la mision lo estipula, dejando registro en la bitacora
-     *
-     * @param asistente - coordinador encargado de recargar la energia. asistente != null
-     */
-    public abstract void aplicarConsecuencias(AsistenteDeComando asistente);
+        if (this.rutaCalculada != null) {
+            for (Posicion coordActual : this.rutaCalculada) {
+                if (!asistente.getNave().enEstadoOperativo()) {
+                    break;
+                }
 
-    /**
-     * Da por concluida formalmente la operacion y asienta el cierre en el registro.
-     * <b>pre:</b> las etapas previas finalizaron correctamente sin excepciones. asistente != null <br>
-     * <b>post:</b> la mision emitio su informe de finalizacion exitosa a traves de la consola y lo anexo como entrada definitiva en la bitacora
-     *
-     * @param asistente - coordinador donde se registrara el evento de cierre. asistente != null
-     */
-    private void finalizarMision(AsistenteDeComando asistente) {
-        asistente.escribeBitacora("Mision M-0" + this.id + " finalizada con exito", "EVENTO");
-        System.out.println("Misión finalizada.");
-        System.out.println(" ");
+                asistente.moverNaveA(coordActual);
+                asistente.interactuarConElementoEn(coordActual, this);
+
+                if (!asistente.getNave().enEstadoOperativo()) {
+                    asistente.escribeBitacora("Misión fallida: La nave quedó destruida o inoperativa en ("
+                            + coordActual.getX() + "," + coordActual.getY() + ")", "ERROR");
+                    this.exito = false;
+                    return;
+                }
+
+                asistente.escanearCortoAlcance();
+                asistente.moverElementosTablero();
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+
+        if (asistente.getNave().enEstadoOperativo()) {
+            this.exito = verificarYEjecutarAccionDestino(asistente);
+        }
     }
+
+    public void evaluarMision(AsistenteDeComando asistente) {
+        String resultado = this.exito ? "ÉXITO" : "FRACASO";
+        String balance = String.format(
+                "Informe Final M-0%d (%s) [%s]\n- Combustible consumido: %d\n- Desgaste base: %d\n- Energía ganada: %d\n- Energía perdida: %d\n- Gemas recolectadas: %d",
+                this.id, this.descripcion, resultado, this.combustible, this.desgaste, this.energiaGanada, this.energiaPerdida, this.gemasRecolectadas
+        );
+        asistente.escribeBitacora(balance, this.exito ? "EVALUACION_EXITO" : "EVALUACION_FRACASO");
+        System.out.println(balance);
+    }
+
+    public void finalizarMision(AsistenteDeComando asistente) {
+        if (this.exito) {
+            aplicarCierreDefinitivo(asistente);
+            asistente.escribeBitacora("Cierre M-0" + this.id + ": Recursos aplicados definitivamente a la nave.", "EVENTO");
+        } else {
+            asistente.escribeBitacora("Cierre M-0" + this.id + ": Misión fallida, no se aplican beneficios.", "EVENTO");
+        }
+        System.out.println("Misión M-0" + this.id + " concluida.");
+    }
+
+    protected abstract boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente);
+    protected abstract void aplicarCierreDefinitivo(AsistenteDeComando asistente);
+
+    public void registrarEnergiaPerdida(int cantidad) { this.energiaPerdida += cantidad; }
+    public void registrarEnergiaGanada(int cantidad) { this.energiaGanada += cantidad; }
+    public void registrarGemasRecolectadas(int cantidad) { this.gemasRecolectadas += cantidad; }
 }

@@ -1,30 +1,33 @@
 package Asistente;
 
+import DestinoTablero.Posicion;
+
 public class MisionIntercepcionAsistencia extends Mision {
 
-    public MisionIntercepcionAsistencia(int id,String descripcion, String destino) {
+    public MisionIntercepcionAsistencia(int id, String descripcion, Posicion destino) {
         super(id, descripcion, destino);
         this.energia = 5;
     }
 
     @Override
-    public void ejecutarMision(AsistenteDeComando asistente) {
-        System.out.println("Ejecutando intercepción y asistencia...");
-        asistente.escribeBitacora("Ejecutando la mision de intercepcion y asistencia", "EVENTO");
-        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
-        System.out.println("Intercepcion y asistencia realizadas con exito.");
-        asistente.escribeBitacora("Intercepcion y asistencia realizadas con exito", "EVENTO");
+    protected boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente) {
+        System.out.println("Verificando transferencia en destino...");
+        asistente.escribeBitacora("Verificando nave aliada en posición de destino ("
+                + getDestino().getX() + ", " + getDestino().getY() + ")", "EVENTO");
 
+        if (asistente.getNave().getEnergia() >= this.energia) {
+            asistente.escribeBitacora("Nave aliada contactada. Recursos listos para transferencia.", "EVENTO");
+            return true;
+        } else {
+            asistente.escribeBitacora("Misión fallida: La nave consumió en el trayecto los recursos a transferir.", "ERROR");
+            return false;
+        }
     }
 
     @Override
-    public void aplicarConsecuencias(AsistenteDeComando asistente) {
-        // Evaluamos: ¿Sobrevivió con recursos suficientes? (Ej: combustible mayor a 0)
-        if (asistente.getNave().getCombustible() > 0 && asistente.getNave().getEnergia() > 0) {
-            asistente.cargarEnergiaNave(this.energia);
-            asistente.escribeBitacora("Evaluación exitosa: Misión completada con recursos estables. Bonificación: +" + this.energia + " Energía", "EVENTO");
-        } else {
-            asistente.escribeBitacora("Evaluación fallida: La nave finalizó la asistencia sin recursos suficientes para operar normalmente.", "ERROR");
-        }
+    protected void aplicarCierreDefinitivo(AsistenteDeComando asistente) {
+        asistente.cargarEnergiaNave(this.energia);
+        this.registrarEnergiaGanada(this.energia);
+        asistente.escribeBitacora("Transferencia completada. Se aplicó bonificación de +" + this.energia + " Energía.", "EVENTO");
     }
 }

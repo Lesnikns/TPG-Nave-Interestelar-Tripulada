@@ -1,29 +1,33 @@
 package Asistente;
 
+import DestinoTablero.Posicion;
+
 public class MisionRetornoSeguro extends Mision {
 
-    public MisionRetornoSeguro(int id,String descripcion, String destino) {
+    public MisionRetornoSeguro(int id, String descripcion, Posicion destino) {
         super(id, descripcion, destino);
+        this.energia = 0;
     }
 
     @Override
-    public void ejecutarMision(AsistenteDeComando asistente) {
-        System.out.println("Completando retorno seguro...");
-        asistente.escribeBitacora("Ejecutando la mision de retorno seguro", "EVENTO");
-        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
-        System.out.println("Retorno realizado con exito.");
-        asistente.escribeBitacora("Retorno realizado con exito", "EVENTO");
+    protected boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente) {
+        System.out.println("Verificando arribo a la base de origen...");
+        asistente.escribeBitacora("Verificando llegada a la base de origen: ("
+                + getDestino().getX() + ", " + getDestino().getY() + ")", "EVENTO");
 
-    }
-
-    @Override
-    public void aplicarConsecuencias(AsistenteDeComando asistente) {
-        // Evaluamos: ¿La nave superó el viaje sin daños críticos?
         if (asistente.getNave().enEstadoOperativo()) {
-            asistente.cargarEnergiaNave(this.energia);
-            asistente.escribeBitacora("Evaluación exitosa: Retorno completado en estado operativo válido. Bonificación: +" + this.energia + " Energía", "EVENTO");
+            asistente.escribeBitacora("Llegada a base confirmada. Nave en estado operativo válido.", "EVENTO");
+            return true;
         } else {
-            asistente.escribeBitacora("Evaluación fallida: La nave llegó a destino pero con daños críticos (Inoperativa).", "ERROR");
+            asistente.escribeBitacora("Misión fallida: La nave llegó a la base con daños críticos (Inoperativa).", "ERROR");
+            return false;
         }
+    }
+
+    @Override
+    protected void aplicarCierreDefinitivo(AsistenteDeComando asistente) {
+        asistente.getNave().realizarMantenimiento();
+        asistente.cargarEnergiaNave(100);
+        asistente.escribeBitacora("Cierre M-03: Mantenimiento completo realizado. Nave reparada y recursos recargados al 100%.", "EVENTO");
     }
 }

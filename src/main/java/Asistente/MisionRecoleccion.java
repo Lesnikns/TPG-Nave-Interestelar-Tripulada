@@ -1,26 +1,37 @@
 package Asistente;
 
-public class MisionRecoleccion extends Mision {
+import DestinoTablero.Posicion;
 
-    public MisionRecoleccion(int id,String descripcion, String destino) {
+public class MisionRecoleccion extends Mision {
+    private int gemasAEncontrar;
+
+    public MisionRecoleccion(int id, String descripcion, Posicion destino, int gemasAEncontrar) {
         super(id, descripcion, destino);
         this.energia = 5;
+        this.gemasAEncontrar = gemasAEncontrar;
+    }
+
+    public MisionRecoleccion(int id, String descripcion, Posicion destino) {
+        this(id, descripcion, destino, 10);
     }
 
     @Override
-    public void ejecutarMision(AsistenteDeComando asistente) {
-        System.out.println("Ejecutando Recoleccion...");
-        asistente.escribeBitacora("Ejecutando la mision de recoleccion", "EVENTO");
-        asistente.ejecutarSaltoYCostos(this.combustible, this.desgaste);
-        System.out.println("Objeto recolectado con exito.");
-        asistente.escribeBitacora("Objeto recolectado con exito", "EVENTO");
+    protected boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente) {
+        System.out.println("Arribado a la coordenada de riquezas. Recolectando gemas...");
+        asistente.escribeBitacora("Arribo exitoso a la coordenada de recolección: ("
+                + getDestino().getX() + ", " + getDestino().getY() + ")", "EVENTO");
 
+        this.registrarGemasRecolectadas(this.gemasAEncontrar);
+        asistente.escribeBitacora("Gemas recolectadas en casilla: " + this.gemasAEncontrar + " unidades.", "EVENTO");
+
+        return true;
     }
 
     @Override
-    public void aplicarConsecuencias(AsistenteDeComando asistente) {
+    protected void aplicarCierreDefinitivo(AsistenteDeComando asistente) {
         asistente.cargarEnergiaNave(this.energia);
-        asistente.escribeBitacora("Evaluación exitosa: Elemento registrado en bodega. Bonificación: +" + this.energia + " Energía", "EVENTO");
+        this.registrarEnergiaGanada(this.energia);
 
+        asistente.escribeBitacora("Cierre M-02: " + this.gemasAEncontrar + " gemas recolectadas y +" + this.energia + " Energía aplicada.", "EVENTO");
     }
 }
