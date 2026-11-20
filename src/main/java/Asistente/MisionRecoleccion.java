@@ -2,36 +2,41 @@ package Asistente;
 
 import DestinoTablero.Posicion;
 
+import java.util.Random;
+
 public class MisionRecoleccion extends Mision {
-    private int gemasAEncontrar;
+    private int gemas;
 
-    public MisionRecoleccion(int id, String descripcion, Posicion destino, int gemasAEncontrar) {
-        super(id, descripcion, destino);
-        this.energia = 5;
-        this.gemasAEncontrar = gemasAEncontrar;
-    }
-
-    public MisionRecoleccion(int id, String descripcion, Posicion destino) {
-        this(id, descripcion, destino, 10);
+    public MisionRecoleccion(int id, String descripcion, Posicion destino, int desgaste, int combustible) {
+        super(id, descripcion, destino, desgaste, combustible, 10 );
+        this.gemas = 0;
     }
 
     @Override
     protected boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente) {
-        System.out.println("Arribado a la coordenada de riquezas. Recolectando gemas...");
-        asistente.escribeBitacora("Arribo exitoso a la coordenada de recolección: ("
-                + getDestino().getX() + ", " + getDestino().getY() + ")", "EVENTO");
-
-        this.registrarGemasRecolectadas(this.gemasAEncontrar);
-        asistente.escribeBitacora("Gemas recolectadas en casilla: " + this.gemasAEncontrar + " unidades.", "EVENTO");
+        asistente.escribeBitacora("Arribado a la coordenada de recolección. Extrayendo recursos...", "EVENTO");
+        int gemasEncontradas = 20 + new Random().nextInt(81);
+        this.gemas = gemasEncontradas;
+        asistente.escribeBitacora("Yacimiento procesado: " + this.gemas + " gemas obtenidas.", "EVENTO");
 
         return true;
     }
 
+
+    @Override
+    protected String obtenerDetalles() {
+        return String.format("- Gemas recolectadas en destino: %d unidades", this.gemas);
+    }
+
+    // Hook de Cierre: Pide al asistente que agregue las gemas a la nave
     @Override
     protected void aplicarCierreDefinitivo(AsistenteDeComando asistente) {
-        asistente.cargarEnergiaNave(this.energia);
-        this.registrarEnergiaGanada(this.energia);
-
-        asistente.escribeBitacora("Cierre M-02: " + this.gemasAEncontrar + " gemas recolectadas y +" + this.energia + " Energía aplicada.", "EVENTO");
+        asistente.agregarGemasANave(this.gemas); // agregar gemas al inventario de la nave
     }
+
+    @Override
+    protected String obtenerMensajeCierre() {
+        return String.format("Extracción finalizada. %d gemas fueron transferidas al inventario.", this.gemas);
+    }
+
 }

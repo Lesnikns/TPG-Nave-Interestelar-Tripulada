@@ -2,7 +2,7 @@
 
 **Trabajo Práctico Grupal 2026 · Programación C · Entrega 1**
 **Etiqueta Git:** `entrega-e1` · **Fecha de entrega:** 15/10/2026
-
+ 
 |                   |            |
 |-------------------|------------|
 | **Grupo**         | `SENIT_G5` |
