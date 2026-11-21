@@ -50,33 +50,6 @@ public class AsistenteDeComando{
         }
     }
 
-    public void verificarMotorDisponible() throws MotorNoDisponibleException {
-        if (!nave.getMotor().disponibleParaSaltar()) {
-            throw new MotorNoDisponibleException("Motor no disponible para salto warp.");
-        }
-    }
-
-    public void ejecutarSaltoYCostos(int combustible, int desgaste) {
-        nave.getMotor().pedirPrepararSalto();
-        nave.consumirCombustible(combustible);
-        nave.aumentarDesgaste(desgaste);
-        nave.getMotor().pedirWarp();
-    }
-
-    public void coordinarMision(Mision m) {
-        try {
-            m.iniciarMision(this);
-            nave.getMotor().pedirDisponibilidad();
-        } catch (NaveNoOperativaException | CombustibleInsuficienteException |
-                 DesgasteCriticoException | MotorNoDisponibleException e) {
-            System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
-            this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
-        } catch (Exception e) {
-            System.out.println("Error crítico inesperado en el sistema: " + e.getMessage());
-            this.escribeBitacora("Error crítico inesperado: " + e.getMessage(), "ERROR");
-        }
-    }
-
     public void escribeBitacora(String mensaje, String tipo) {
         Entrada e = new Entrada(mensaje, tipo);
         bitacora.cargaEntrada(e);
@@ -103,7 +76,8 @@ public class AsistenteDeComando{
     public void coordinarMision(Mision m) {
         try {
             m.iniciarMision(this);
-        } catch (NaveNoOperativaException | CombustibleInsuficienteException | EnergiaInsuficienteException |  DesgasteCriticoException e) {
+        } catch (NaveNoOperativaException | CombustibleInsuficienteException | EnergiaInsuficienteException |
+                 DesgasteCriticoException | MotorNoDisponibleException e) {
             System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
             this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
         } catch (Exception e) {
@@ -163,7 +137,7 @@ public class AsistenteDeComando{
         nave.agregarGemas(cantidad);
     }
     public void entregarCombustibleNave(int cantidad) {
-        if (!nave.consumirEnergia(cantidad)) {
+        if (!nave.consumirCombustible(cantidad)) {
             throw new IllegalStateException("No se pudo completar la transferencia de combustible.");
         }
     }
@@ -267,7 +241,6 @@ public class AsistenteDeComando{
 
     public void despegar(int combustible, int energia, int desgaste) {
         cobrarCostoInicial(combustible, energia, desgaste);
-        escribeBitacora("Despegue ejecutado. Costos iniciales: " + combustible + " comb, " + energia + " energía, " + desgaste + " desgaste.", "EVENTO");
         publicarTurno();                       // bitácora y después publicar
     }
 
