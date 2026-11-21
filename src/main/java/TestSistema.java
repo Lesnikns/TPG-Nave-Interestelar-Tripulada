@@ -62,17 +62,18 @@ public class TestSistema{
 
         // Agregar mas paneles con ventana.agregarPanel(Titulo, vista, y un booleano que indica si el panel requiere
         // el uso de la nave o no)
-        PanelInformes panelInformes = new PanelInformes(historial);
+        PanelInformes panelInformes = new PanelInformes();
         //ventana.agregarPanel("Informes", panelInformes, false);   // pestaña temporal para probar
 
-        PanelBitacora panelBitacora = new PanelBitacora(sesion);
+        //PanelBitacora panelBitacora = new PanelBitacora(sesion);
+        PanelBitacora panelBitacora = new PanelBitacora(); //el de juan
         //ventana.agregarPanel("Bitácora", panelBitacora, true);
         vistaControl.setPanelesRegistro(panelBitacora, panelInformes);
         publicador.agregarObservador(vistaControl);
         new ControladorControl(vistaControl, sesion);
         new ControladorLogin(vistaLogin, ventana, servicio);
         new ControladorRegistro(vistaRegistro, ventana, servicio);
-        new ControladorCreacion(vistaCreacion, sesion, publicador,historial);
+        new ControladorCreacion(vistaCreacion, sesion, panelBitacora,panelInformes,publicador,historial);
 
         // Las pestañas que necesitan nave se habilitan cuando la sesión tiene una
         sesion.agregarObservador(new IObservadorModelo<String>() {

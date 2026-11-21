@@ -19,6 +19,8 @@ import Tripulacion.Teniente;
 import Tripulacion.Terricola;
 import Tripulacion.Tripulante;
 import Tripulacion.Vulcano;
+import Vista.PanelBitacora;
+import Vista.PanelInformes;
 import Vista.VistaCreacion;
 
 import java.awt.event.ActionEvent;
@@ -31,12 +33,16 @@ public class ControladorCreacion implements ActionListener {
     private FabricaDeNaves fabrica = new FabricaDeNaves();
     private PublicadorDeTurnos publicador;
     private HistorialDeInformes historial;
+    private PanelInformes panelInformes;
+    private PanelBitacora panelBitacora;
 
-    public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion, PublicadorDeTurnos publicador, HistorialDeInformes historial) {
+    public ControladorCreacion(VistaCreacion vista, SesionDeNave sesion, PanelBitacora panelBitacora, PanelInformes panelInformes, PublicadorDeTurnos publicador,HistorialDeInformes historial) {
         this.vista = vista;
         this.sesion = sesion;
         this.publicador = publicador;
         this.historial=historial;
+        this.panelInformes=panelInformes;
+        this.panelBitacora= panelBitacora;
         vista.setControlador(this);
     }
 
@@ -66,6 +72,8 @@ public class ControladorCreacion implements ActionListener {
                 AsistenteDeComando asistente = new AsistenteDeComando(nave, tablero, publicador,historial);
                 nave.setAsistente(asistente);
 	            sesion.setNave(nave);
+                panelBitacora.observar(nave.getAsistente().getBitacora());
+                panelInformes.observar(historial);
                 asistente.publicarTurno();
 	            actualizarVista();
 	        }
