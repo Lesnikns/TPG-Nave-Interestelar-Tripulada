@@ -7,18 +7,29 @@ public class MisionIntercepcionAsistencia extends Mision {
     private static final int consumoCombustible = 4;
     private static final int consumoEnergia = 5;
     private static final int generaDesgaste = 4;
-    private final int energiaAEntregar = 5;
+    private static final int MAX_AUXILIO = 50;
 
-    public MisionIntercepcionAsistencia(int id, String descripcion, Posicion destino) {
-        super(id, descripcion, destino,consumoCombustible,consumoEnergia,generaDesgaste);
+    // Auxilio solicitado por la nave aliada: entre 0 y 50 de energía y/o combustible.
+    private final int energiaAEntregar;
+    private final int combustibleAEntregar;
+
+    public MisionIntercepcionAsistencia(int id, String descripcion, Posicion destino, int energiaT, int combustibleT) {
+        super(id, descripcion, destino, generaDesgaste, consumoCombustible, consumoEnergia);
+        if (energiaT < 0 || energiaT > MAX_AUXILIO || combustibleT < 0 || combustibleT > MAX_AUXILIO) {
+            throw new IllegalArgumentException("El auxilio solicitado debe estar entre 0 y " + MAX_AUXILIO + " puntos.");
+        }
+        this.energiaAEntregar = energiaT;
+        this.combustibleAEntregar = combustibleT;
         this.energia = 5;
     }
 
     @Override
     protected boolean verificarYEjecutarAccionDestino(AsistenteDeComando asistente) {
         System.out.println("Verificando transferencia en destino...");
+        asistente.escribeBitacora("Verificando nave aliada en posición de destino ("
+                + getDestino().getX() + ", " + getDestino().getY() + ")", "EVENTO");
 
-        if (asistente.getEnergia()>= this.energia) {
+        if (asistente.getEnergia() >= this.energiaAEntregar && asistente.getCombustible() >= this.combustibleAEntregar) {
             this.registrarTransferido(energiaAEntregar);
             asistente.escribeBitacora("Nave aliada contactada. Recursos listos para transferencia.", "EVENTO");
             return true;
@@ -31,6 +42,12 @@ public class MisionIntercepcionAsistencia extends Mision {
     @Override
     protected void aplicarCierreDefinitivo(AsistenteDeComando asistente) {
         asistente.entregarEnergiaNave(energiaAEntregar);
-        asistente.escribeBitacora("Transferencia completada. Se entregaron " + energiaAEntregar + " unidades de energía.", "EVENTO");
+        asistente.entregarCombustibleNave(combustibleAEntregar);
+    }
+
+    @Override
+    protected String obtenerMensajeCierre() {
+        return String.format("Transferencia de auxilio completada (%d energía, %d combustible entregados).",
+                energiaAEntregar, combustibleAEntregar);
     }
 }

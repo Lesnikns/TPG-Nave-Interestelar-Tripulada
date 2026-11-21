@@ -52,7 +52,6 @@ public class PanelBitacora extends JPanel implements IObservadorModelo<Entrada> 
 
         this.add(titulo, BorderLayout.NORTH);
         this.add(new JScrollPane(this.area), BorderLayout.CENTER);
-        
     }
 
     /**

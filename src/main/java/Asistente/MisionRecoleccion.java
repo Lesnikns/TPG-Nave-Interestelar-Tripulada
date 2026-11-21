@@ -5,13 +5,12 @@ import DestinoTablero.Posicion;
 public class MisionRecoleccion extends Mision {
 // M-02 — Recolección: Consume 4 puntos de combustible, 10 puntos de energía y genera 4 puntos de desgaste.
     private static final int consumoCombustible = 4;
-    private static final int consumoEnergia = 4;
+    private static final int consumoEnergia = 10;
     private static final int generaDesgaste = 4;
     private static final int energiaRecompensa = 5;
 
     public MisionRecoleccion(int id, String descripcion, Posicion destino) {
-        super(id, descripcion, destino,consumoCombustible,consumoEnergia,generaDesgaste);
-        this.energia = 5;
+        super(id, descripcion, destino,generaDesgaste,consumoCombustible,consumoEnergia);
     }
 
     @Override

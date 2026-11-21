@@ -2,6 +2,7 @@ package Controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.ThreadLocalRandom;
 
 import Asistente.*;
 import DestinoTablero.Posicion;
@@ -58,7 +59,9 @@ public class ControladorControl implements ActionListener {
     private Mision crearMision(int numero) {
         switch (numero) {
             case 1:
-                return new MisionIntercepcionAsistencia(1, "Intercepción y asistencia", null);
+                int energiaT = ThreadLocalRandom.current().nextInt(0, 51);      // 0 a 50
+                int combustibleT = ThreadLocalRandom.current().nextInt(0, 51);  // 0 a 50
+                return new MisionIntercepcionAsistencia(1, "Intercepción y asistencia", null, energiaT, combustibleT);
             case 2:
                 return new MisionRecoleccion(2, "Recolección", null);
             case 3:

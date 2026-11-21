@@ -121,6 +121,11 @@ public class AsistenteDeComando{
     public void agregarGemasNave(int cantidad) {
         nave.agregarGemas(cantidad);
     }
+    public void entregarCombustibleNave(int cantidad) {
+        if (!nave.consumirEnergia(cantidad)) {
+            throw new IllegalStateException("No se pudo completar la transferencia de combustible.");
+        }
+    }
     public void entregarEnergiaNave(int cantidad) {
         if (!nave.consumirEnergia(cantidad)) {
             throw new IllegalStateException("No se pudo completar la transferencia de energía.");

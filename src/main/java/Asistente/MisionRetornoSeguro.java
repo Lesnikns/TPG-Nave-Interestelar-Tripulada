@@ -9,7 +9,7 @@ public class MisionRetornoSeguro extends Mision {
 
     public MisionRetornoSeguro(int id, String descripcion, Posicion destino) {
         //M-03 — Retorno a punto seguro: Consume 4 puntos de combustible, 0 puntos de energía y genera 4 puntos de desgaste.
-        super(id, descripcion, destino,consumoCombustible,consumoEnergia,generaDesgaste);
+        super(id, descripcion, destino,generaDesgaste,consumoCombustible,consumoEnergia);
         this.energia = 0;
     }
 
