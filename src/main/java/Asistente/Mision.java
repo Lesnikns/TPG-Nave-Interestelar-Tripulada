@@ -1,7 +1,6 @@
 package Asistente;
 
 import DestinoTablero.Posicion;
-
 import java.util.List;
 import Excepciones.*;
 

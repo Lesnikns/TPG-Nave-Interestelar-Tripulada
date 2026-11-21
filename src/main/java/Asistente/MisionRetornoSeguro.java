@@ -1,7 +1,7 @@
 package Asistente;
 
 import DestinoTablero.Posicion;
-//TODO en el controlador habrá que poner que no se pueda ejecutar dos veces consecutivas (ya está en la base)
+
 public class MisionRetornoSeguro extends Mision {
     private static final int consumoCombustible = 4;
     private static final int consumoEnergia = 0;

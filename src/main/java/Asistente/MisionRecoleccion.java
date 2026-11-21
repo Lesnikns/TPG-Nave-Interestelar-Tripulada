@@ -35,4 +35,5 @@ public class MisionRecoleccion extends Mision {
         asistente.agregarGemasNave(gemas);
         asistente.escribeBitacora("Cierre M-02: " + gemas + " gemas incorporadas al inventario de la nave.", "EVENTO");
     }
+
 }

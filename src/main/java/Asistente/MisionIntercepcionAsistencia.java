@@ -1,7 +1,7 @@
 package Asistente;
 
 import DestinoTablero.Posicion;
-//TODO todavia no existe nave aliada
+
 public class MisionIntercepcionAsistencia extends Mision {
     //M-01 — Intercepción y asistencia: Consume 4 puntos de combustible, 5 puntos de energía y genera 4 puntos de desgaste.
     private static final int consumoCombustible = 4;

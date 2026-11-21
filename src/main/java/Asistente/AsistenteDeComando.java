@@ -5,6 +5,7 @@ import Excepciones.*;
 import Naves.Nave;
 import Tripulacion.Tripulante;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AsistenteDeComando{
@@ -33,6 +34,46 @@ public class AsistenteDeComando{
         this.tablero = tablero;
         if (tablero != null) {
             this.destino = new Destino(tablero);
+        }
+    }
+
+    public void verificarRecursos(int combReq, int desgasteReq)
+            throws NaveNoOperativaException, CombustibleInsuficienteException, DesgasteCriticoException {
+        if (!nave.enEstadoOperativo()) {
+            throw new NaveNoOperativaException("Nave dañada, requiere mantenimiento previo.");
+        }
+        if (nave.getCombustible() < combReq) {
+            throw new CombustibleInsuficienteException("Combustible insuficiente (requiere " + combReq + ", tiene " + nave.getCombustible() + ").");
+        }
+        if (nave.getDesgaste() + desgasteReq > 100) {
+            throw new DesgasteCriticoException("Riesgo crítico: La misión superará el 100% de desgaste permitido.");
+        }
+    }
+
+    public void verificarMotorDisponible() throws MotorNoDisponibleException {
+        if (!nave.getMotor().disponibleParaSaltar()) {
+            throw new MotorNoDisponibleException("Motor no disponible para salto warp.");
+        }
+    }
+
+    public void ejecutarSaltoYCostos(int combustible, int desgaste) {
+        nave.getMotor().pedirPrepararSalto();
+        nave.consumirCombustible(combustible);
+        nave.aumentarDesgaste(desgaste);
+        nave.getMotor().pedirWarp();
+    }
+
+    public void coordinarMision(Mision m) {
+        try {
+            m.iniciarMision(this);
+            nave.getMotor().pedirDisponibilidad();
+        } catch (NaveNoOperativaException | CombustibleInsuficienteException |
+                 DesgasteCriticoException | MotorNoDisponibleException e) {
+            System.out.println("El asistente informa: La misión fue abortada. Causa: " + e.getMessage());
+            this.escribeBitacora("Misión abortada - " + e.getMessage(), "ERROR");
+        } catch (Exception e) {
+            System.out.println("Error crítico inesperado en el sistema: " + e.getMessage());
+            this.escribeBitacora("Error crítico inesperado: " + e.getMessage(), "ERROR");
         }
     }
 
